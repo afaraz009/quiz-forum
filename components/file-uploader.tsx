@@ -9,6 +9,14 @@ import { AlertCircle, Copy, FileUp, Clipboard } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 
 interface FileUploaderProps {
@@ -27,25 +35,16 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     }
 
     return data.map((item, index) => {
-      if (!item.question || !item.correctAnswer) {
+      if (!item.question || !item.options || !item.correctAnswer) {
         throw new Error(`Question at index ${index} is missing required fields`)
       }
 
-      // Check if it's an MCQ (has options)
-      if (item.options) {
-        if (!Array.isArray(item.options)) {
-          throw new Error(`Options for question "${item.question}" must be an array`)
-        }
+      if (!Array.isArray(item.options) || item.options.length !== 4) {
+        throw new Error(`Question "${item.question}" must have exactly 4 options`)
+      }
 
-        if (item.options.length !== 4) {
-          throw new Error(`Question "${item.question}" must have exactly 4 options`)
-        }
-
-        if (!item.options.includes(item.correctAnswer)) {
-          throw new Error(
-            `Correct answer "${item.correctAnswer}" is not in the options for question "${item.question}"`,
-          )
-        }
+      if (!item.options.includes(item.correctAnswer)) {
+        throw new Error(`Correct answer "${item.correctAnswer}" is not in the options for question "${item.question}"`)
       }
 
       return {
@@ -111,7 +110,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
       () => {
         toast({
           title: "Copied to clipboard",
-          description: "Text has been copied to your clipboard",
+          description: "Sample JSON has been copied to your clipboard",
         })
       },
       (err) => {
@@ -133,43 +132,20 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
         correctAnswer: "Mars",
       },
       {
-        question: "What is 2 + 2?",
-        correctAnswer: "4",
+        question: "Who painted the Mona Lisa?",
+        options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
+        correctAnswer: "Leonardo da Vinci",
       },
     ],
     null,
     2,
   )
 
-  const samplePrompt = `Create a comprehensive learning quiz in JSON format. The quiz should include both multiple-choice questions and short answer translation questions. 
+  const samplePrompt = `Create a quiz with multiple-choice questions. Each question should have exactly 4 options and one correct answer. Format your response as a JSON array with the following structure:
 
-For multiple-choice questions, include the "options" array with exactly 4 possible 
-For short answer questions, omit the "options" field.
+${sampleJson}
 
- Format your response as a JSON array with the following structure:
-[
-  {
-    "question": "Identify tense: 'She walks to school every day'?",
-    "options": ["Present Simple", "Present Continuous", "Past Simple", "Past Continuous"],
-    "correctAnswer": "Present Simple"
-  },
-  {
-    "question": "Translate: 'میں روز اسکول جاتا ہوں'?",
-    "correctAnswer": "I go to school everyday"
-  },
-  ...
-]
-Requirements:
-- Create 6 questions where an English sentence is provided, and students must identify which tense it is (Present Simple, Present Continuous, Past Simple, or Past Continuous). 
-- Tense identification should only be asked in MCQs
-- Create 4 questions MCQ where an Urdu sentence is provided, and students must select  the correct English translation
-- Create 4 short Answer questions for urdu to english translation
--  Ensure a balanced mix of all tenses with affirmative, negative, and interrogative examples
--  For Urdu translation MCQ questions: make sure the options include translations in different tenses
-- Make sure each question has exactly 4 options
-- For Urdu translation short questions: make sure the correct answer is provided in the answer
-- Ensure the correct answer is always included among the options
-- Use common everyday situations in all sentences`
+Please provide at least 5 questions on [TOPIC]. Make sure the correct answer is included in the options array.`
 
   return (
     <div className="w-full">
@@ -188,7 +164,7 @@ Requirements:
         <TabsContent value="upload">
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center ${
-              isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+              isDragging ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25"
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -207,7 +183,7 @@ Requirements:
             />
             <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
               <svg
-                className="w-12 h-12 text-gray-400 mb-3"
+                className="w-12 h-12 text-muted-foreground mb-3"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -220,10 +196,10 @@ Requirements:
                   d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                 ></path>
               </svg>
-              <p className="mb-2 text-sm text-gray-500">
+              <p className="mb-2 text-sm text-muted-foreground">
                 <span className="font-semibold">Click to upload</span> or drag and drop
               </p>
-              <p className="text-xs text-gray-500">JSON files only</p>
+              <p className="text-xs text-muted-foreground">JSON files only</p>
             </label>
           </div>
 
@@ -257,41 +233,45 @@ Requirements:
         </Alert>
       )}
 
-      <div className="mt-6 space-y-6">
-        {/* Combined Format and Sample Section */}
-        <div className="p-4 border border-gray-200 rounded-md bg-gray-50">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium">Expected JSON Format:</h3>
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => copyToClipboard(sampleJson)}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy
-            </Button>
-          </div>
-          <pre className="text-xs overflow-x-auto p-2 bg-gray-100 rounded mb-4">
-            {`[
+      <div className="mt-6 flex justify-center">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">View Sample Prompt</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Sample Prompt for LLM</DialogTitle>
+              <DialogDescription>Copy this prompt to generate quiz questions with an AI assistant</DialogDescription>
+            </DialogHeader>
+            <div className="bg-muted p-4 rounded-md border">
+              <pre className="text-sm whitespace-pre-wrap text-muted-foreground">{samplePrompt}</pre>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => copyToClipboard(sampleJson)}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Sample JSON
+              </Button>
+              <Button onClick={() => copyToClipboard(samplePrompt)}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Full Prompt
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="mt-6 p-4 border rounded-md bg-muted">
+        <h3 className="text-sm font-medium mb-2 text-foreground">Expected JSON Format:</h3>
+        <pre className="text-xs overflow-x-auto p-2 bg-background border rounded text-muted-foreground">
+          {`[
   {
     "question": "What is the capital of France?",
     "options": ["London", "Berlin", "Paris", "Madrid"],
     "correctAnswer": "Paris"
   },
-  {
-    "question": "What is 2 + 2?",
-    "correctAnswer": "4"
-  }
+  ...
 ]`}
-          </pre>
-
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium">Sample Prompt for LLM:</h3>
-              <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => copyToClipboard(samplePrompt)}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
-            </div>
-            <div className="text-xs p-2 bg-gray-100 rounded whitespace-pre-wrap">{samplePrompt}</div>
-          </div>
-        </div>
+        </pre>
       </div>
     </div>
   )

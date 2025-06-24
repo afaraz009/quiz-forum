@@ -1,30 +1,115 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { FileUploader } from "@/components/file-uploader"
 import { Quiz } from "@/components/quiz"
+import { QuizSaveDialog } from "@/components/quiz-save-dialog"
 import type { QuizQuestion } from "@/types/quiz"
+import { Button } from "@/components/ui/button"
 
-export default function Page() {
+export default function Home() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [savedQuizId, setSavedQuizId] = useState<string | null>(null)
 
-  const handleFileUpload = (questions: QuizQuestion[]) => {
-    setQuestions(questions)
+  const handleFileUpload = (parsedQuestions: QuizQuestion[]) => {
+    setQuestions(parsedQuestions)
+    setIsLoaded(true)
+    setSavedQuizId(null) // Reset saved quiz ID for new upload
   }
 
-  const handleReset = () => {
-    setQuestions([])
+  const handleSaveQuiz = () => {
+    setShowSaveDialog(true)
+  }
+
+  const handleSaveSuccess = (quizId: string) => {
+    setSavedQuizId(quizId)
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="container mx-auto p-4 md:p-8 max-w-4xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="container mx-auto p-4 md:p-8 max-w-4xl">
+        <div className="text-center space-y-6 min-h-[400px] flex flex-col justify-center">
+          <h1 className="text-3xl font-bold">Welcome to Quiz Forum</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Please sign in to access the quiz functionality and track your progress.
+          </p>
+          <Button onClick={() => router.push("/login")} size="lg">
+            Sign In to Continue
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <main className="flex flex-col items-center justify-start min-h-screen py-12 bg-gray-100">
-      <h1 className="text-4xl font-extrabold tracking-tight mb-8">Quiz App</h1>
+    <div className="container mx-auto p-4 md:p-8 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-6 text-center">Knowledge Test Forum</h1>
 
-      {!questions.length ? (
-        <FileUploader onFileUpload={handleFileUpload} />
+      {!isLoaded ? (
+        <div className="bg-card rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Upload Quiz Questions</h2>
+          <p className="mb-4 text-muted-foreground">
+            Upload a JSON file containing quiz questions. The file should be formatted with questions, options, and
+            correct answers.
+          </p>
+          <FileUploader onFileUpload={handleFileUpload} />
+
+          <div className="mt-6 p-4 border border-border rounded-md bg-muted">
+            <h3 className="text-sm font-medium mb-2">Expected JSON Format:</h3>
+            <pre className="text-xs overflow-x-auto p-2 bg-muted-foreground/10 rounded">
+              {`[
+  {
+    "question": "What is the capital of France?",
+    "options": ["London", "Berlin", "Paris", "Madrid"],
+    "correctAnswer": "Paris"
+  },
+  ...
+]`}
+            </pre>
+          </div>
+        </div>
       ) : (
-        <Quiz questions={questions} onReset={handleReset} />
+        <>
+          <div className="mb-4 flex justify-between items-center">
+            <Button variant="outline" onClick={() => setIsLoaded(false)}>
+              Load New Quiz
+            </Button>
+            {!savedQuizId && (
+              <Button onClick={handleSaveQuiz}>
+                Save Quiz
+              </Button>
+            )}
+            {savedQuizId && (
+              <Button variant="outline" onClick={() => router.push("/dashboard")}>
+                View Dashboard
+              </Button>
+            )}
+          </div>
+          <Quiz questions={questions} savedQuizId={savedQuizId} />
+          <QuizSaveDialog
+            isOpen={showSaveDialog}
+            onClose={() => setShowSaveDialog(false)}
+            questions={questions}
+            onSaveSuccess={handleSaveSuccess}
+          />
+        </>
       )}
-    </main>
+    </div>
   )
 }
