@@ -21,9 +21,11 @@ interface QuizSaveDialogProps {
   onClose: () => void
   questions: QuizQuestion[]
   onSaveSuccess: (quizId: string) => void
+  currentScore?: number
+  currentAnswers?: Record<number, string>
 }
 
-export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess }: QuizSaveDialogProps) {
+export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess, currentScore, currentAnswers }: QuizSaveDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -51,8 +53,34 @@ export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess }: Qu
       const data = await response.json()
 
       if (response.ok) {
+        const quizId = data.quiz.id
+        
+        // If there's a current score/answers, save the attempt too
+        if (currentScore !== undefined && currentAnswers) {
+          try {
+            const attemptResponse = await fetch("/api/quiz/submit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                quizId,
+                score: currentScore,
+                totalQuestions: questions.length,
+                answers: currentAnswers,
+              }),
+            })
+            
+            if (!attemptResponse.ok) {
+              console.error("Failed to save quiz attempt")
+            }
+          } catch (error) {
+            console.error("Error saving quiz attempt:", error)
+          }
+        }
+        
         toast.success("Quiz saved successfully!")
-        onSaveSuccess(data.quiz.id)
+        onSaveSuccess(quizId)
         setTitle("")
         setDescription("")
         onClose()

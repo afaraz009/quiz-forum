@@ -16,11 +16,15 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [savedQuizId, setSavedQuizId] = useState<string | null>(null)
+  const [currentScore, setCurrentScore] = useState<number | undefined>(undefined)
+  const [currentAnswers, setCurrentAnswers] = useState<Record<number, string> | undefined>(undefined)
 
   const handleFileUpload = (parsedQuestions: QuizQuestion[]) => {
     setQuestions(parsedQuestions)
     setIsLoaded(true)
     setSavedQuizId(null) // Reset saved quiz ID for new upload
+    setCurrentScore(undefined)
+    setCurrentAnswers(undefined)
   }
 
   const handleSaveQuiz = () => {
@@ -29,6 +33,11 @@ export default function Home() {
 
   const handleSaveSuccess = (quizId: string) => {
     setSavedQuizId(quizId)
+  }
+
+  const handleQuizComplete = (score: number, answers: Record<number, string>) => {
+    setCurrentScore(score)
+    setCurrentAnswers(answers)
   }
 
   if (status === "loading") {
@@ -101,12 +110,14 @@ export default function Home() {
               </Button>
             )}
           </div>
-          <Quiz questions={questions} savedQuizId={savedQuizId} />
+          <Quiz questions={questions} savedQuizId={savedQuizId} onQuizComplete={handleQuizComplete} />
           <QuizSaveDialog
             isOpen={showSaveDialog}
             onClose={() => setShowSaveDialog(false)}
             questions={questions}
             onSaveSuccess={handleSaveSuccess}
+            currentScore={currentScore}
+            currentAnswers={currentAnswers}
           />
         </>
       )}

@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,9 +19,11 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     const quiz = await prisma.quiz.findUnique({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })

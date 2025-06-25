@@ -10,9 +10,10 @@ import { toast } from "sonner"
 interface QuizProps {
   questions: QuizQuestion[]
   savedQuizId?: string | null
+  onQuizComplete?: (score: number, answers: Record<number, string>) => void
 }
 
-export function Quiz({ questions, savedQuizId }: QuizProps) {
+export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
@@ -33,6 +34,9 @@ export function Quiz({ questions, savedQuizId }: QuizProps) {
 
     setScore(correctAnswers)
     setSubmitted(true)
+    
+    // Notify parent component about quiz completion
+    onQuizComplete?.(correctAnswers, selectedAnswers)
 
     // Save attempt if quiz is saved
     if (savedQuizId) {
