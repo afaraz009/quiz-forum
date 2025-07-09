@@ -6,6 +6,15 @@ import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
+// Validate required environment variables
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("NEXTAUTH_SECRET is required for NextAuth")
+}
+
+if (!process.env.NEXTAUTH_URL) {
+  throw new Error("NEXTAUTH_URL is required for NextAuth")
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
