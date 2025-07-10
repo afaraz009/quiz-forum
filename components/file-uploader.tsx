@@ -35,16 +35,19 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     }
 
     return data.map((item, index) => {
-      if (!item.question || !item.options || !item.correctAnswer) {
-        throw new Error(`Question at index ${index} is missing required fields`)
+      if (!item.question || !item.correctAnswer) {
+        throw new Error(`Question at index ${index} is missing required fields (question and correctAnswer)`)
       }
 
-      if (!Array.isArray(item.options) || item.options.length !== 4) {
-        throw new Error(`Question "${item.question}" must have exactly 4 options`)
-      }
+      // If options are provided, validate as MCQ
+      if (item.options) {
+        if (!Array.isArray(item.options) || item.options.length !== 4) {
+          throw new Error(`MCQ question "${item.question}" must have exactly 4 options`)
+        }
 
-      if (!item.options.includes(item.correctAnswer)) {
-        throw new Error(`Correct answer "${item.correctAnswer}" is not in the options for question "${item.question}"`)
+        if (!item.options.includes(item.correctAnswer)) {
+          throw new Error(`Correct answer "${item.correctAnswer}" is not in the options for question "${item.question}"`)
+        }
       }
 
       return {
@@ -132,20 +135,23 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
         correctAnswer: "Mars",
       },
       {
-        question: "Who painted the Mona Lisa?",
-        options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
-        correctAnswer: "Leonardo da Vinci",
+        question: "What is the largest ocean on Earth?",
+        correctAnswer: "Pacific Ocean",
+      },
+      {
+        question: "In what year did World War II end?",
+        correctAnswer: "1945",
       },
     ],
     null,
     2,
   )
 
-  const samplePrompt = `Create a quiz with multiple-choice questions. Each question should have exactly 4 options and one correct answer. Format your response as a JSON array with the following structure:
+  const samplePrompt = `Create a quiz with both multiple-choice questions (MCQ) and short answer questions. For MCQ questions, provide exactly 4 options. For short answer questions, omit the options field. Format your response as a JSON array with the following structure:
 
 ${sampleJson}
 
-Please provide at least 5 questions on [TOPIC]. Make sure the correct answer is included in the options array.`
+Please provide at least 5 questions on [TOPIC]. For MCQ questions, make sure the correct answer is included in the options array. For short answer questions, provide the exact answer expected.`
 
   return (
     <div className="w-full">
@@ -268,6 +274,10 @@ Please provide at least 5 questions on [TOPIC]. Make sure the correct answer is 
     "question": "What is the capital of France?",
     "options": ["London", "Berlin", "Paris", "Madrid"],
     "correctAnswer": "Paris"
+  },
+  {
+    "question": "What is the largest ocean on Earth?",
+    "correctAnswer": "Pacific Ocean"
   },
   ...
 ]`}

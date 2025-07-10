@@ -27,9 +27,22 @@ export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
     }))
   }
 
+  const normalizeAnswer = (answer: string) => {
+    return answer.trim().toLowerCase().replace(/\s+/g, ' ')
+  }
+
   const handleSubmit = async () => {
     const correctAnswers = questions.reduce((count, question, index) => {
-      return selectedAnswers[index] === question.correctAnswer ? count + 1 : count
+      const userAnswer = selectedAnswers[index]
+      if (!userAnswer) return count
+      
+      // For MCQ questions, exact match is required
+      if (question.options) {
+        return userAnswer === question.correctAnswer ? count + 1 : count
+      }
+      
+      // For short answer questions, use normalized comparison
+      return normalizeAnswer(userAnswer) === normalizeAnswer(question.correctAnswer) ? count + 1 : count
     }, 0)
 
     setScore(correctAnswers)
