@@ -28,8 +28,18 @@ export async function POST(request: NextRequest) {
 
     // Validate questions format
     questions.forEach((q: any, index: number) => {
-      if (!q.question || !q.options || !q.correctAnswer) {
-        throw new Error(`Question at index ${index} is missing required fields`)
+      if (!q.question || !q.correctAnswer) {
+        throw new Error(`Question at index ${index} is missing required fields (question and correctAnswer)`)
+      }
+      
+      // If options are provided, validate as MCQ
+      if (q.options && (!Array.isArray(q.options) || q.options.length !== 4)) {
+        throw new Error(`MCQ question at index ${index} must have exactly 4 options`)
+      }
+      
+      // If options are provided, correct answer must be in options
+      if (q.options && !q.options.includes(q.correctAnswer)) {
+        throw new Error(`Correct answer for question at index ${index} must be included in options`)
       }
     })
 
