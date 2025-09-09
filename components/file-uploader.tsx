@@ -122,36 +122,27 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     )
   }
 
-  const sampleJson = JSON.stringify(
-    [
-      {
-        question: "What is the capital of France?",
-        options: ["London", "Berlin", "Paris", "Madrid"],
-        correctAnswer: "Paris",
-      },
-      {
-        question: "Which planet is known as the Red Planet?",
-        options: ["Venus", "Mars", "Jupiter", "Saturn"],
-        correctAnswer: "Mars",
-      },
-      {
-        question: "What is the largest ocean on Earth?",
-        correctAnswer: "Pacific Ocean",
-      },
-      {
-        question: "In what year did World War II end?",
-        correctAnswer: "1945",
-      },
-    ],
-    null,
-    2,
-  )
+ 
+  const samplePrompt = `You are a quiz generator.
+  Create a JSON array of multiple-choice quiz questions about identifying verb tenses.
+  Each element in the array must follow this format:
+  {
+    "question": "Identify tense: '<Sentence here>'",
+    "options": ["<Tense 1>", "<Tense 2>", "<Tense 3>", "<Tense 4>"],
+    "correctAnswer": "<The correct tense (must exactly match one from options)>"
+  }
+  Guidelines:
+  - Generate 10 MCQ questions
+  - Use ONLY the tenses [Present Simple, Present Continuous, Past Simple, Past Continuous, Future Simple, Future Continuous].
+  - Randomly generate short, everyday sentences in clear English.
+  - Each sentence must reflect one of the provided tenses.
+  - Always include 4 unique options (no duplicates).
+  - Ensure the correct answer is in one of the options.
+  - Output a valid JSON array containing as many questions as the user requests.
+  - Do not include explanations, comments, or extra text outside the JSON.`
 
-  const samplePrompt = `Create a quiz with both multiple-choice questions (MCQ) and short answer questions. For MCQ questions, provide exactly 4 options. For short answer questions, omit the options field. Format your response as a JSON array with the following structure:
 
-${sampleJson}
 
-Please provide at least 5 questions on [TOPIC]. For MCQ questions, make sure the correct answer is included in the options array. For short answer questions, provide the exact answer expected.`
 
   return (
     <div className="w-full">
@@ -253,10 +244,6 @@ Please provide at least 5 questions on [TOPIC]. For MCQ questions, make sure the
               <pre className="text-sm whitespace-pre-wrap text-muted-foreground">{samplePrompt}</pre>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => copyToClipboard(sampleJson)}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Sample JSON
-              </Button>
               <Button onClick={() => copyToClipboard(samplePrompt)}>
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Full Prompt
@@ -266,23 +253,7 @@ Please provide at least 5 questions on [TOPIC]. For MCQ questions, make sure the
         </Dialog>
       </div>
 
-      <div className="mt-6 p-4 border rounded-md bg-muted">
-        <h3 className="text-sm font-medium mb-2 text-foreground">Expected JSON Format:</h3>
-        <pre className="text-xs overflow-x-auto p-2 bg-background border rounded text-muted-foreground">
-          {`[
-  {
-    "question": "What is the capital of France?",
-    "options": ["London", "Berlin", "Paris", "Madrid"],
-    "correctAnswer": "Paris"
-  },
-  {
-    "question": "What is the largest ocean on Earth?",
-    "correctAnswer": "Pacific Ocean"
-  },
-  ...
-]`}
-        </pre>
-      </div>
+     
     </div>
   )
 }

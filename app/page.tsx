@@ -79,19 +79,7 @@ export default function Home() {
           </p>
           <FileUploader onFileUpload={handleFileUpload} />
 
-          <div className="mt-6 p-4 border border-border rounded-md bg-muted">
-            <h3 className="text-sm font-medium mb-2">Expected JSON Format:</h3>
-            <pre className="text-xs overflow-x-auto p-2 bg-muted-foreground/10 rounded">
-              {`[
-  {
-    "question": "What is the capital of France?",
-    "options": ["London", "Berlin", "Paris", "Madrid"],
-    "correctAnswer": "Paris"
-  },
-  ...
-]`}
-            </pre>
-          </div>
+         
         </div>
       ) : (
         <>
