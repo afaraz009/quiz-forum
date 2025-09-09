@@ -139,6 +139,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   - Always include 4 unique options (no duplicates).
   - Ensure the correct answer is in one of the options.
   - Output a valid JSON array containing as many questions as the user requests.
+  - Make sure to shuffle the position of correct answers in the options.
   - Do not include explanations, comments, or extra text outside the JSON.`
 
 
@@ -146,66 +147,13 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
 
   return (
     <div className="w-full">
-      <Tabs defaultValue="upload" className="w-full mb-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="upload" className="flex items-center gap-2">
-            <FileUp className="h-4 w-4" />
-            Upload File
-          </TabsTrigger>
+      <Tabs defaultValue="paste" className="w-full mb-4">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="paste" className="flex items-center gap-2">
             <Clipboard className="h-4 w-4" />
             Paste JSON
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="upload">
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center ${
-              isDragging ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25"
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              accept=".json"
-              onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  handleFileChange(e.target.files[0])
-                }
-              }}
-            />
-            <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
-              <svg
-                className="w-12 h-12 text-muted-foreground mb-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                ></path>
-              </svg>
-              <p className="mb-2 text-sm text-muted-foreground">
-                <span className="font-semibold">Click to upload</span> or drag and drop
-              </p>
-              <p className="text-xs text-muted-foreground">JSON files only</p>
-            </label>
-          </div>
-
-          <div className="mt-4 flex justify-center">
-            <Button asChild>
-              <label htmlFor="file-upload">Select JSON File</label>
-            </Button>
-          </div>
-        </TabsContent>
 
         <TabsContent value="paste">
           <div className="space-y-4">
