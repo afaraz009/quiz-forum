@@ -133,7 +133,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   }
   Guidelines:
   - Generate 10 MCQ questions
-  - Use ONLY the tenses [Present Simple, Present Continuous, Past Simple, Past Continuous, Future Simple, Future Continuous].
+  - Use ONLY the tenses [Present Simple, Present Continuous, Past Simple, Past Continuous].
   - Randomly generate short, everyday sentences in clear English.
   - Each sentence must reflect one of the provided tenses.
   - Always include 4 unique options (no duplicates).

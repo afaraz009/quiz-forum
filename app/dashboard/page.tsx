@@ -113,24 +113,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Get started with your quiz activities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                onClick={() => router.push("/")} 
-                className="w-full"
-              >
-                Start New Quiz
-              </Button>
-            </CardContent>
-          </Card>
-
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Quiz History</CardTitle>
@@ -150,7 +133,6 @@ export default function DashboardPage() {
                   />
                 </div>
               )}
-              
               {quizHistory.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No saved quizzes yet.</p>
@@ -174,7 +156,6 @@ export default function DashboardPage() {
                         </div>
                         <Badge variant="secondary">{quiz.totalQuestions} questions</Badge>
                       </div>
-                      
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Highest Score</p>
@@ -200,7 +181,6 @@ export default function DashboardPage() {
                           </p>
                         </div>
                       </div>
-                      
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => handleRetakeQuiz(quiz.id)}>
                           Take Quiz
@@ -213,6 +193,23 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Get started with your quiz activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={() => router.push("/")} 
+                className="w-full"
+              >
+                Start New Quiz
+              </Button>
             </CardContent>
           </Card>
         </div>
