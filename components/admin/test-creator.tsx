@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { FileUploader } from "@/components/file-uploader"
 import { Quiz } from "@/components/quiz"
@@ -20,7 +19,6 @@ interface TestMetadata {
   description: string
   timeLimit?: number
   passingPercentage: number
-  isPublished: boolean
 }
 
 export function TestCreator() {
@@ -30,7 +28,6 @@ export function TestCreator() {
     description: "",
     timeLimit: undefined,
     passingPercentage: 60,
-    isPublished: false,
   })
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -74,7 +71,8 @@ export function TestCreator() {
           ...metadata,
           questions: JSON.stringify(questions),
           totalQuestions: questions.length,
-          publishedAt: metadata.isPublished ? new Date().toISOString() : null,
+          isPublished: true,
+          publishedAt: new Date().toISOString(),
         }),
       })
 
@@ -84,8 +82,8 @@ export function TestCreator() {
 
       const savedTest = await response.json()
       toast({
-        title: "Test saved successfully",
-        description: `Test "${metadata.title}" has been ${metadata.isPublished ? 'published' : 'saved as draft'}`,
+        title: "Test published successfully",
+        description: `Test "${metadata.title}" has been published and is now available to students`,
       })
 
       // Reset form
@@ -95,7 +93,6 @@ export function TestCreator() {
         description: "",
         timeLimit: undefined,
         passingPercentage: 60,
-        isPublished: false,
       })
 
     } catch (error) {
@@ -235,21 +232,6 @@ export function TestCreator() {
                 </div>
               </div>
 
-              <Separator />
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="isPublished">Publish Test</Label>
-                    <p className="text-sm text-gray-600">Make test available to students immediately</p>
-                  </div>
-                  <Switch
-                    id="isPublished"
-                    checked={metadata.isPublished}
-                    onCheckedChange={(checked) => setMetadata(prev => ({ ...prev, isPublished: checked }))}
-                  />
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
