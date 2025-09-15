@@ -484,21 +484,44 @@ export default function AdminResultsDashboard() {
                 {/* Recent Attempts */}
                 {test.recentAttempts.length > 0 && (
                   <div>
-                    <h4 className="font-semibold mb-2">Recent Attempts</h4>
+                    <h4 className="font-semibold mb-2 text-gray-900">Recent Attempts</h4>
                     <div className="space-y-2">
-                      {test.recentAttempts.slice(0, 3).map((attempt, index) => (
-                        <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <span className="font-medium">{attempt.studentName}</span>
-                            <span className="text-sm text-muted-foreground ml-2">
-                              ({attempt.studentEmail})
-                            </span>
+                      {test.recentAttempts
+                        .sort((a, b) => {
+                          // Sort by pass/fail status first (passed first), then by percentage descending
+                          if (a.passed !== b.passed) return b.passed ? 1 : -1
+                          return b.percentage - a.percentage
+                        })
+                        .slice(0, 3)
+                        .map((attempt, index) => (
+                        <div key={index} className={`flex justify-between items-center py-3 px-4 rounded-lg border-2 ${
+                          attempt.passed
+                            ? 'bg-green-50 border-green-200'
+                            : 'bg-red-50 border-red-200'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {attempt.passed ? (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-600" />
+                            )}
+                            <div>
+                              <span className="font-medium text-gray-900">{attempt.studentName}</span>
+                              <span className="text-sm text-gray-600 ml-2">
+                                ({attempt.studentEmail})
+                              </span>
+                            </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Badge variant={attempt.percentage >= 80 ? "default" : attempt.percentage >= 60 ? "secondary" : "destructive"}>
-                              {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
+                            <div className="text-right">
+                              <div className={`font-semibold ${attempt.passed ? 'text-green-700' : 'text-red-700'}`}>
+                                {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
+                              </div>
+                              <div className={`text-xs ${attempt.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                {attempt.passed ? 'PASSED' : 'FAILED'}
+                              </div>
+                            </div>
+                            <span className="text-sm text-gray-600">
                               {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
                             </span>
                           </div>
@@ -510,6 +533,7 @@ export default function AdminResultsDashboard() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleViewDetails(test.id)}
+                            className="text-gray-700 hover:text-gray-900"
                           >
                             View all {test.completedAttempts} attempts
                           </Button>
