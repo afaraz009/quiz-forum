@@ -12,12 +12,13 @@ interface QuizProps {
   savedQuizId?: string | null
   onQuizComplete?: (score: number, answers: Record<number, string>) => void
   onSubmit?: (answers: Record<number, string>) => void
+  onAnswerChange?: (answers: Record<number, string>) => void
   title?: string
   readonly?: boolean
   isAssessmentMode?: boolean
 }
 
-export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, title, readonly = false, isAssessmentMode = false }: QuizProps) {
+export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswerChange, title, readonly = false, isAssessmentMode = false }: QuizProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
@@ -25,10 +26,17 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, title, 
   const handleAnswerSelect = (questionIndex: number, answer: string) => {
     if (submitted || readonly) return
 
-    setSelectedAnswers((prev) => ({
-      ...prev,
+    const newAnswers = {
+      ...selectedAnswers,
       [questionIndex]: answer,
-    }))
+    }
+
+    setSelectedAnswers(newAnswers)
+
+    // Call the answer change callback if provided
+    if (onAnswerChange) {
+      onAnswerChange(newAnswers)
+    }
   }
 
   const normalizeAnswer = (answer: string) => {

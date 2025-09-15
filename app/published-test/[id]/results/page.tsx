@@ -202,8 +202,8 @@ export default function TestResultsPage() {
                     <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-2">Question {index + 1}</h3>
-                    <p className="text-gray-700 mb-3">{question.question}</p>
+                    <h3 className="font-semibold mb-2 text-gray-900">Question {index + 1}</h3>
+                    <p className="text-gray-800 mb-3">{question.question}</p>
 
                     {/* Multiple choice options */}
                     {question.options && (
@@ -221,7 +221,7 @@ export default function TestResultsPage() {
                               <div className="flex items-center gap-2">
                                 {isCorrectAnswer && <CheckCircle className="h-4 w-4 text-green-600" />}
                                 {isUserChoice && !isCorrectAnswer && <XCircle className="h-4 w-4 text-red-600" />}
-                                <span className={isCorrectAnswer ? 'font-medium' : ''}>{option}</span>
+                                <span className={`${isCorrectAnswer ? 'font-medium text-green-800' : 'text-gray-800'}`}>{option}</span>
                               </div>
                             </div>
                           )
@@ -232,18 +232,18 @@ export default function TestResultsPage() {
                     {/* Answer summary */}
                     <div className="space-y-1 text-sm">
                       <div className="flex gap-2">
-                        <span className="font-medium">Your answer:</span>
+                        <span className="font-medium text-gray-900">Your answer:</span>
                         <span className={
-                          isUnanswered ? 'text-yellow-600 italic' :
-                          isCorrect ? 'text-green-600' : 'text-red-600'
+                          isUnanswered ? 'text-yellow-700 italic' :
+                          isCorrect ? 'text-green-700' : 'text-red-700'
                         }>
                           {isUnanswered ? 'No answer provided' : userAnswer}
                         </span>
                       </div>
                       {!isCorrect && (
                         <div className="flex gap-2">
-                          <span className="font-medium">Correct answer:</span>
-                          <span className="text-green-600">{question.correctAnswer}</span>
+                          <span className="font-medium text-gray-900">Correct answer:</span>
+                          <span className="text-green-700">{question.correctAnswer}</span>
                         </div>
                       )}
                     </div>

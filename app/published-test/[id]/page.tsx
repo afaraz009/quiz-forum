@@ -37,6 +37,7 @@ export default function PublishedTestPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasSubmittedRef = useRef(false)
+  const currentAnswersRef = useRef<Record<number, string>>({})
 
   const fetchTestData = useCallback(async () => {
     try {
@@ -63,6 +64,9 @@ export default function PublishedTestPage() {
 
   const handleSubmitQuiz = useCallback(async (answers: Record<number, string>) => {
     if (!testData || hasSubmittedRef.current) return
+
+    // Update current answers ref
+    currentAnswersRef.current = answers
 
     hasSubmittedRef.current = true
     setIsSubmitting(true)
@@ -102,6 +106,10 @@ export default function PublishedTestPage() {
     setHasStarted(true)
   }
 
+  const handleAnswerChange = useCallback((answers: Record<number, string>) => {
+    currentAnswersRef.current = answers
+  }, [])
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -129,7 +137,7 @@ export default function PublishedTestPage() {
           if (prev === null || prev <= 1) {
             // Time's up - auto submit if not already submitted
             if (!hasSubmittedRef.current) {
-              setTimeout(() => handleSubmitQuiz({}), 0)
+              setTimeout(() => handleSubmitQuiz(currentAnswersRef.current), 0)
             }
             return 0
           }
@@ -320,6 +328,7 @@ export default function PublishedTestPage() {
         <Quiz
           questions={testData.questions}
           onSubmit={handleSubmitQuiz}
+          onAnswerChange={handleAnswerChange}
           title={testData.title}
           readonly={false}
           isAssessmentMode={true}
