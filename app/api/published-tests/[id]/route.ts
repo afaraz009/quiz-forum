@@ -48,7 +48,7 @@ export async function GET(
             score: true,
             isCompleted: true,
             completedAt: true,
-            createdAt: true
+            startedAt: true
           }
         }
       }
