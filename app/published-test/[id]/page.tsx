@@ -35,6 +35,7 @@ export default function PublishedTestPage() {
   const [hasStarted, setHasStarted] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fetchTestData = useCallback(async () => {
     try {
@@ -60,8 +61,9 @@ export default function PublishedTestPage() {
   }, [testId])
 
   const handleSubmitQuiz = useCallback(async (answers: Record<number, string>) => {
-    if (!testData) return
+    if (!testData || isSubmitting) return
 
+    setIsSubmitting(true)
     try {
       const response = await fetch('/api/published-tests/submit', {
         method: 'POST',
@@ -82,12 +84,14 @@ export default function PublishedTestPage() {
         const errorData = await response.json()
         console.error('Error submitting test:', errorData.error)
         alert('Error submitting test: ' + errorData.error)
+        setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error submitting test:', error)
       alert('Error submitting test. Please try again.')
+      setIsSubmitting(false)
     }
-  }, [testData, testId, router])
+  }, [testData, testId, router, isSubmitting])
 
   const handleStartTest = () => {
     setHasStarted(true)
@@ -113,7 +117,7 @@ export default function PublishedTestPage() {
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout
-    if (hasStarted && timeRemaining !== null && timeRemaining > 0) {
+    if (hasStarted && timeRemaining !== null && timeRemaining > 0 && !isSubmitting) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev === null || prev <= 1) {
@@ -128,7 +132,7 @@ export default function PublishedTestPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [hasStarted, timeRemaining, handleSubmitQuiz])
+  }, [hasStarted, handleSubmitQuiz, isSubmitting])
 
   if (status === "loading" || isLoading) {
     return (

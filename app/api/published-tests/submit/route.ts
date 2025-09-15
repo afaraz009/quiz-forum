@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
         publishedTestId: testId,
         answers: JSON.stringify(answers),
         score: score,
+        totalQuestions: questions.length,
         isCompleted: true,
         completedAt: new Date(),
         startedAt: new Date() // For now, assume started when submitted
