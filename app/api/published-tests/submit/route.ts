@@ -54,14 +54,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You have already attempted this test' }, { status: 400 })
     }
 
-    // Check if test is overdue and late submissions not allowed
-    if (test.dueDate && !test.allowLateSubmissions) {
-      const now = new Date()
-      const dueDate = new Date(test.dueDate)
-      if (now > dueDate) {
-        return NextResponse.json({ error: 'Test is overdue and late submissions are not allowed' }, { status: 400 })
-      }
-    }
 
     // Parse questions and calculate score
     const questions = JSON.parse(test.questions)

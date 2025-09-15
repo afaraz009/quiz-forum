@@ -19,8 +19,7 @@ interface TestMetadata {
   title: string
   description: string
   timeLimit?: number
-  dueDate?: string
-  allowLateSubmissions: boolean
+  passingPercentage: number
   isPublished: boolean
 }
 
@@ -30,8 +29,7 @@ export function TestCreator() {
     title: "",
     description: "",
     timeLimit: undefined,
-    dueDate: "",
-    allowLateSubmissions: false,
+    passingPercentage: 60,
     isPublished: false,
   })
   const [isPreviewMode, setIsPreviewMode] = useState(false)
@@ -96,8 +94,7 @@ export function TestCreator() {
         title: "",
         description: "",
         timeLimit: undefined,
-        dueDate: "",
-        allowLateSubmissions: false,
+        passingPercentage: 60,
         isPublished: false,
       })
 
@@ -209,43 +206,38 @@ export function TestCreator() {
                     id="timeLimit"
                     type="number"
                     value={metadata.timeLimit || ""}
-                    onChange={(e) => setMetadata(prev => ({ 
-                      ...prev, 
-                      timeLimit: e.target.value ? parseInt(e.target.value) : undefined 
+                    onChange={(e) => setMetadata(prev => ({
+                      ...prev,
+                      timeLimit: e.target.value ? parseInt(e.target.value) : undefined
                     }))}
                     placeholder="No limit"
                     className="mt-1"
                     min="1"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Students will see a countdown timer during the test</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="dueDate">Due Date (optional)</Label>
+                  <Label htmlFor="passingPercentage">Passing Percentage (%)</Label>
                   <Input
-                    id="dueDate"
-                    type="datetime-local"
-                    value={metadata.dueDate}
-                    onChange={(e) => setMetadata(prev => ({ ...prev, dueDate: e.target.value }))}
+                    id="passingPercentage"
+                    type="number"
+                    value={metadata.passingPercentage}
+                    onChange={(e) => setMetadata(prev => ({
+                      ...prev,
+                      passingPercentage: Math.max(0, Math.min(100, parseInt(e.target.value) || 60))
+                    }))}
                     className="mt-1"
+                    min="0"
+                    max="100"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Minimum percentage required to pass</p>
                 </div>
               </div>
 
               <Separator />
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="allowLateSubmissions">Allow Late Submissions</Label>
-                    <p className="text-sm text-gray-600">Allow students to submit after due date</p>
-                  </div>
-                  <Switch
-                    id="allowLateSubmissions"
-                    checked={metadata.allowLateSubmissions}
-                    onCheckedChange={(checked) => setMetadata(prev => ({ ...prev, allowLateSubmissions: checked }))}
-                  />
-                </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="isPublished">Publish Test</Label>

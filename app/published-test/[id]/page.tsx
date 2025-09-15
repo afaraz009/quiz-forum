@@ -16,14 +16,11 @@ interface PublishedTestData {
   description: string | null
   questions: QuizQuestion[]
   timeLimit: number | null
-  dueDate: string | null
-  allowLateSubmissions: boolean
   createdBy: {
     name: string | null
     email: string
   }
   hasAttempted: boolean
-  isOverdue: boolean
   canTakeTest: boolean
 }
 
@@ -210,23 +207,6 @@ export default function PublishedTestPage() {
     )
   }
 
-  // Show overdue message if test is overdue and late submissions not allowed
-  if (testData.isOverdue && !testData.allowLateSubmissions) {
-    return (
-      <div className="container mx-auto p-4 md:p-8 max-w-4xl">
-        <div className="text-center space-y-6 min-h-[400px] flex flex-col justify-center">
-          <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-          <h1 className="text-3xl font-bold">Test Overdue</h1>
-          <p className="text-muted-foreground">
-            This test is past its due date and late submissions are not allowed.
-          </p>
-          <Button onClick={() => router.push("/dashboard")} size="lg">
-            Back to Dashboard
-          </Button>
-        </div>
-      </div>
-    )
-  }
 
   // Pre-test screen
   if (!hasStarted) {
@@ -260,12 +240,6 @@ export default function PublishedTestPage() {
                     <span>{testData.timeLimit} minutes</span>
                   </div>
                 )}
-                {testData.dueDate && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>Due: {new Date(testData.dueDate).toLocaleDateString()}</span>
-                  </div>
-                )}
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -281,14 +255,6 @@ export default function PublishedTestPage() {
                 </ul>
               </div>
 
-              {testData.isOverdue && testData.allowLateSubmissions && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-orange-800">📅 Late Submission</h3>
-                  <p className="text-sm text-orange-700">
-                    This test is past its due date, but late submissions are allowed.
-                  </p>
-                </div>
-              )}
 
               <div className="flex gap-4 pt-4">
                 <Button

@@ -98,17 +98,27 @@ export async function GET(request: NextRequest) {
         dist.percentage = completedAttempts > 0 ? (dist.count / completedAttempts) * 100 : 0
       })
 
+      // Calculate pass/fail statistics based on test's passing percentage
+      const passingThreshold = test.passingPercentage || 60
+      const passedAttempts = percentages.filter(percentage => percentage >= passingThreshold).length
+      const failedAttempts = completedAttempts - passedAttempts
+      const passRate = completedAttempts > 0 ? (passedAttempts / completedAttempts) * 100 : 0
+
       // Get recent attempts (last 5)
       const recentAttempts = attempts
         .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
         .slice(0, 5)
-        .map(attempt => ({
-          studentName: attempt.user.name || 'Unknown',
-          studentEmail: attempt.user.email,
-          score: attempt.score || 0,
-          completedAt: attempt.completedAt!,
-          percentage: attempt.score ? (attempt.score / totalQuestions) * 100 : 0
-        }))
+        .map(attempt => {
+          const percentage = attempt.score ? (attempt.score / totalQuestions) * 100 : 0
+          return {
+            studentName: attempt.user.name || 'Unknown',
+            studentEmail: attempt.user.email,
+            score: attempt.score || 0,
+            completedAt: attempt.completedAt!,
+            percentage,
+            passed: percentage >= passingThreshold
+          }
+        })
 
       return {
         id: test.id,
@@ -122,6 +132,11 @@ export async function GET(request: NextRequest) {
         highestScore,
         lowestScore,
         completionRate,
+        // Pass/fail statistics
+        passingPercentage: passingThreshold,
+        passedAttempts,
+        failedAttempts,
+        passRate,
         scoreDistribution: scoreDistribution.filter(dist => dist.count > 0), // Only include ranges with data
         recentAttempts
       }

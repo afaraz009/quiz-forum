@@ -59,8 +59,6 @@ export async function GET(request: NextRequest) {
       title: test.title,
       description: test.description,
       timeLimit: test.timeLimit,
-      dueDate: test.dueDate,
-      allowLateSubmissions: test.allowLateSubmissions,
       createdBy: test.createdBy,
       publishedAt: test.publishedAt,
       totalQuestions: JSON.parse(test.questions).length,
@@ -68,8 +66,7 @@ export async function GET(request: NextRequest) {
       hasAttempted: test.testAttempts.length > 0,
       attempt: test.testAttempts[0] || null, // There should only be one attempt per user per test
       // Status indicators
-      canTakeTest: test.testAttempts.length === 0, // Can only take if no attempts
-      isOverdue: test.dueDate ? new Date() > new Date(test.dueDate) : false
+      canTakeTest: test.testAttempts.length === 0 // Can only take if no attempts
     }))
 
     return NextResponse.json({ publishedTests: formattedTests })

@@ -68,11 +68,8 @@ export async function GET(
       description: test.description,
       questions: questions,
       timeLimit: test.timeLimit,
-      dueDate: test.dueDate,
-      allowLateSubmissions: test.allowLateSubmissions,
       createdBy: test.createdBy,
       hasAttempted: test.testAttempts.length > 0,
-      isOverdue: test.dueDate ? new Date() > new Date(test.dueDate) : false,
       canTakeTest: test.testAttempts.length === 0
     }
 

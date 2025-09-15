@@ -68,8 +68,7 @@ export async function POST(request: Request) {
       questions,
       totalQuestions,
       timeLimit,
-      dueDate,
-      allowLateSubmissions,
+      passingPercentage,
       isPublished,
       publishedAt
     } = body
@@ -100,8 +99,7 @@ export async function POST(request: Request) {
         questions,
         totalQuestions,
         timeLimit: timeLimit || null,
-        dueDate: dueDate ? new Date(dueDate) : null,
-        allowLateSubmissions: allowLateSubmissions || false,
+        passingPercentage: passingPercentage || 60,
         isPublished: isPublished || false,
         publishedAt: isPublished && publishedAt ? new Date(publishedAt) : null,
         createdByUserId: session.user.id
@@ -122,6 +120,52 @@ export async function POST(request: Request) {
     console.error("Failed to create published test:", error)
     return NextResponse.json(
       { error: "Failed to create published test" },
+      { status: 500 }
+    )
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+// DELETE - Delete a published test
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const testId = searchParams.get('id')
+
+    if (!testId) {
+      return NextResponse.json({ error: "Test ID is required" }, { status: 400 })
+    }
+
+    // Check if test exists and user has permission
+    const test = await prisma.publishedTest.findUnique({
+      where: { id: testId },
+      include: { testAttempts: true }
+    })
+
+    if (!test) {
+      return NextResponse.json({ error: "Test not found" }, { status: 404 })
+    }
+
+    // Delete the test (this will cascade delete test attempts due to the schema)
+    await prisma.publishedTest.delete({
+      where: { id: testId }
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `Test "${test.title}" and ${test.testAttempts.length} associated attempts deleted successfully`
+    })
+  } catch (error) {
+    console.error("Failed to delete published test:", error)
+    return NextResponse.json(
+      { error: "Failed to delete published test" },
       { status: 500 }
     )
   } finally {

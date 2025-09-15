@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar } from "lucide-react"
+import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface TestAnalytics {
@@ -24,6 +24,10 @@ interface TestAnalytics {
   highestScore: number
   lowestScore: number
   completionRate: number
+  passingPercentage: number
+  passedAttempts: number
+  failedAttempts: number
+  passRate: number
   scoreDistribution: {
     range: string
     count: number
@@ -35,6 +39,7 @@ interface TestAnalytics {
     score: number
     completedAt: string
     percentage: number
+    passed: boolean
   }[]
 }
 
@@ -46,6 +51,8 @@ export default function AdminResultsDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("publishedAt")
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingTestId, setDeletingTestId] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
 
   const fetchTestsAnalytics = useCallback(async () => {
     try {
@@ -137,15 +144,59 @@ export default function AdminResultsDashboard() {
     }
   }
 
+  const handleDeleteTest = async (testId: string) => {
+    setDeletingTestId(testId)
+    try {
+      const response = await fetch(`/api/admin/published-tests?id=${testId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        // Remove the test from the current list
+        setTestsAnalytics(prev => prev.filter(test => test.id !== testId))
+        setShowDeleteConfirm(null)
+        // Show success message (you could add a toast here)
+        console.log(result.message)
+      } else {
+        const errorData = await response.json()
+        console.error("Failed to delete test:", errorData.error)
+      }
+    } catch (error) {
+      console.error("Error deleting test:", error)
+    } finally {
+      setDeletingTestId(null)
+    }
+  }
+
   const calculateOverallStats = () => {
-    if (testsAnalytics.length === 0) return { totalTests: 0, totalAttempts: 0, averageCompletion: 0, averageScore: 0 }
+    if (testsAnalytics.length === 0) return {
+      totalTests: 0,
+      totalAttempts: 0,
+      averageCompletion: 0,
+      averageScore: 0,
+      totalPassed: 0,
+      totalFailed: 0,
+      overallPassRate: 0
+    }
 
     const totalTests = testsAnalytics.length
     const totalAttempts = testsAnalytics.reduce((sum, test) => sum + test.completedAttempts, 0)
     const averageCompletion = testsAnalytics.reduce((sum, test) => sum + test.completionRate, 0) / totalTests
     const averageScore = testsAnalytics.reduce((sum, test) => sum + test.averageScore, 0) / totalTests
+    const totalPassed = testsAnalytics.reduce((sum, test) => sum + test.passedAttempts, 0)
+    const totalFailed = testsAnalytics.reduce((sum, test) => sum + test.failedAttempts, 0)
+    const overallPassRate = totalAttempts > 0 ? (totalPassed / totalAttempts) * 100 : 0
 
-    return { totalTests, totalAttempts, averageCompletion, averageScore }
+    return {
+      totalTests,
+      totalAttempts,
+      averageCompletion,
+      averageScore,
+      totalPassed,
+      totalFailed,
+      overallPassRate
+    }
   }
 
   const overallStats = calculateOverallStats()
@@ -178,7 +229,7 @@ export default function AdminResultsDashboard() {
       </div>
 
       {/* Overall Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -205,10 +256,10 @@ export default function AdminResultsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg. Completion</p>
-                <p className="text-2xl font-bold">{overallStats.averageCompletion.toFixed(1)}%</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg. Score</p>
+                <p className="text-2xl font-bold">{overallStats.averageScore.toFixed(1)}%</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
+              <BarChart3 className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -216,10 +267,32 @@ export default function AdminResultsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg. Score</p>
-                <p className="text-2xl font-bold">{overallStats.averageScore.toFixed(1)}%</p>
+                <p className="text-sm font-medium text-muted-foreground">Students Passed</p>
+                <p className="text-2xl font-bold text-green-600">{overallStats.totalPassed}</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-orange-500" />
+              <CheckCircle className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Students Failed</p>
+                <p className="text-2xl font-bold text-red-600">{overallStats.totalFailed}</p>
+              </div>
+              <XCircle className="h-8 w-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Overall Pass Rate</p>
+                <p className="text-2xl font-bold text-blue-600">{overallStats.overallPassRate.toFixed(1)}%</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -307,6 +380,37 @@ export default function AdminResultsDashboard() {
                       <Download className="h-4 w-4" />
                       Export CSV
                     </Button>
+                    {showDeleteConfirm === test.id ? (
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteTest(test.id)}
+                          disabled={deletingTestId === test.id}
+                          className="gap-1"
+                        >
+                          {deletingTestId === test.id ? "Deleting..." : "Confirm"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowDeleteConfirm(null)}
+                          disabled={deletingTestId === test.id}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(test.id)}
+                        className="gap-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
