@@ -140,6 +140,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   - Ensure the correct answer is in one of the options.
   - Output a valid JSON array containing as many questions as the user requests.
   - Make sure to shuffle the position of correct answers in the options.
+  - In the options array keep the postion of each tense same for all questions
   - Do not include explanations, comments, or extra text outside the JSON.`
 
 
