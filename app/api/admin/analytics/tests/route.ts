@@ -104,10 +104,9 @@ export async function GET(request: NextRequest) {
       const failedAttempts = completedAttempts - passedAttempts
       const passRate = completedAttempts > 0 ? (passedAttempts / completedAttempts) * 100 : 0
 
-      // Get recent attempts (last 5)
+      // Get all attempts (sorted by most recent first)
       const recentAttempts = attempts
         .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
-        .slice(0, 5)
         .map(attempt => {
           const percentage = attempt.score ? (attempt.score / totalQuestions) * 100 : 0
           return {
