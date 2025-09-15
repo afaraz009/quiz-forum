@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle } from "lucide-react"
+import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface TestAnalytics {
@@ -53,6 +53,7 @@ export default function AdminResultsDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [deletingTestId, setDeletingTestId] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set())
 
   const fetchTestsAnalytics = useCallback(async () => {
     try {
@@ -142,6 +143,18 @@ export default function AdminResultsDashboard() {
     } catch (error) {
       console.error("Error exporting data:", error)
     }
+  }
+
+  const toggleTestExpanded = (testId: string) => {
+    setExpandedTests(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(testId)) {
+        newSet.delete(testId)
+      } else {
+        newSet.add(testId)
+      }
+      return newSet
+    })
   }
 
   const handleDeleteTest = async (testId: string) => {
@@ -345,12 +358,20 @@ export default function AdminResultsDashboard() {
         ) : (
           filteredTests.map((test) => (
             <Card key={test.id} className="border-l-4 border-l-blue-500">
-              <CardHeader>
+              <CardHeader
+                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                onClick={() => toggleTestExpanded(test.id)}
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
                       {test.title}
                       <Badge variant="secondary">{test.totalQuestions} questions</Badge>
+                      {expandedTests.has(test.id) ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </CardTitle>
                     {test.description && (
                       <CardDescription className="mt-2">{test.description}</CardDescription>
@@ -362,7 +383,7 @@ export default function AdminResultsDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       size="sm"
                       onClick={() => handleViewDetails(test.id)}
@@ -414,7 +435,8 @@ export default function AdminResultsDashboard() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              {expandedTests.has(test.id) && (
+                <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-muted-foreground">Completion Rate</p>
@@ -551,7 +573,8 @@ export default function AdminResultsDashboard() {
                     </div>
                   </div>
                 )}
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           ))
         )}
