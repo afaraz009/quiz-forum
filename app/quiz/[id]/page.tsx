@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
 import { Quiz } from "@/components/quiz"
@@ -32,9 +32,9 @@ export default function QuizRetakePage() {
     if (session?.user && quizId) {
       fetchQuiz()
     }
-  }, [session, quizId])
+  }, [session, quizId, fetchQuiz])
 
-  const fetchQuiz = async () => {
+  const fetchQuiz = useCallback(async () => {
     try {
       const response = await fetch(`/api/quiz/${quizId}`)
       if (response.ok) {
@@ -48,7 +48,7 @@ export default function QuizRetakePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [quizId])
 
   if (status === "loading" || isLoading) {
     return (

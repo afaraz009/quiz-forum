@@ -53,6 +53,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           username: user.username,
+          isAdmin: user.isAdmin,
         }
       }
     })
@@ -64,12 +65,14 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.sub!
+        session.user.isAdmin = token.isAdmin as boolean
       }
       return session
     },
     jwt: async ({ user, token }) => {
       if (user) {
         token.sub = user.id
+        token.isAdmin = (user as any).isAdmin
       }
       return token
     },

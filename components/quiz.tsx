@@ -11,15 +11,19 @@ interface QuizProps {
   questions: QuizQuestion[]
   savedQuizId?: string | null
   onQuizComplete?: (score: number, answers: Record<number, string>) => void
+  onSubmit?: (answers: Record<number, string>) => void
+  title?: string
+  readonly?: boolean
+  isAssessmentMode?: boolean
 }
 
-export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
+export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, title, readonly = false, isAssessmentMode = false }: QuizProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
 
   const handleAnswerSelect = (questionIndex: number, answer: string) => {
-    if (submitted) return
+    if (submitted || readonly) return
 
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -32,22 +36,28 @@ export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
   }
 
   const handleSubmit = async () => {
+    // For assessment mode, use custom onSubmit handler
+    if (isAssessmentMode && onSubmit) {
+      onSubmit(selectedAnswers)
+      return
+    }
+
     const correctAnswers = questions.reduce((count, question, index) => {
       const userAnswer = selectedAnswers[index]
       if (!userAnswer) return count
-      
+
       // For MCQ questions, exact match is required
       if (question.options) {
         return userAnswer === question.correctAnswer ? count + 1 : count
       }
-      
+
       // For short answer questions, use normalized comparison
       return normalizeAnswer(userAnswer) === normalizeAnswer(question.correctAnswer) ? count + 1 : count
     }, 0)
 
     setScore(correctAnswers)
     setSubmitted(true)
-    
+
     // Notify parent component about quiz completion
     onQuizComplete?.(correctAnswers, selectedAnswers)
 
@@ -87,8 +97,17 @@ export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
   const allQuestionsAnswered = Object.keys(selectedAnswers).length === questions.length
 
   return (
-    <div className="bg-background border rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-6 text-foreground">Quiz Questions</h2>
+    <div className={`bg-background border rounded-lg shadow-md p-6 ${
+      isAssessmentMode ? 'border-orange-300 bg-orange-50/10' : ''
+    }`}>
+      <h2 className="text-xl font-semibold mb-6 text-foreground flex items-center gap-2">
+        {title || "Quiz Questions"}
+        {isAssessmentMode && (
+          <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+            Assessment Mode
+          </span>
+        )}
+      </h2>
 
       <div className="space-y-8 mb-8">
         {questions.map((question, index) => (
@@ -103,34 +122,48 @@ export function Quiz({ questions, savedQuizId, onQuizComplete }: QuizProps) {
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
-        {submitted ? (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-medium">
-                Your Score: {score} / {questions.length}
-              </span>
-              {score === questions.length ? (
-                <CheckCircle className="h-6 w-6 text-green-500" />
-              ) : (
-                <XCircle className="h-6 w-6 text-red-500" />
-              )}
-            </div>
-            <Button onClick={handleReset}>Try Again</Button>
-          </>
-        ) : (
-          <>
-            <div className="text-sm text-muted-foreground">
-              {allQuestionsAnswered
-                ? "All questions answered. Ready to submit!"
-                : `${Object.keys(selectedAnswers).length} of ${questions.length} questions answered`}
-            </div>
-            <Button onClick={handleSubmit} disabled={!allQuestionsAnswered}>
-              Submit Answers
-            </Button>
-          </>
-        )}
-      </div>
+      {!readonly && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
+          {submitted ? (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-medium">
+                  Your Score: {score} / {questions.length}
+                </span>
+                {score === questions.length ? (
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                ) : (
+                  <XCircle className="h-6 w-6 text-red-500" />
+                )}
+              </div>
+              <Button onClick={handleReset}>Try Again</Button>
+            </>
+          ) : (
+            <>
+              <div className="text-sm text-muted-foreground">
+                {allQuestionsAnswered
+                  ? "All questions answered. Ready to submit!"
+                  : `${Object.keys(selectedAnswers).length} of ${questions.length} questions answered`}
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={!allQuestionsAnswered}
+                className={isAssessmentMode ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              >
+                {isAssessmentMode ? 'Submit Test' : 'Submit Answers'}
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+      
+      {readonly && (
+        <div className="pt-4 border-t">
+          <div className="text-center text-muted-foreground">
+            Preview mode - This is how students will see the test
+          </div>
+        </div>
+      )}
     </div>
   )
 }
