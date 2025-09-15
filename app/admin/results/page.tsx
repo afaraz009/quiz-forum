@@ -484,13 +484,10 @@ export default function AdminResultsDashboard() {
                 {/* Recent Attempts */}
                 {test.recentAttempts.length > 0 && (
                   <div>
-                    <h4 className="font-semibold mb-2 text-gray-900">Recent Attempts</h4>
-                    <div className="space-y-2">
-                      <div className={`space-y-2 ${
-                        test.recentAttempts.length > 3
-                          ? 'max-h-96 overflow-y-auto pr-2'
-                          : ''
-                      }`}>
+                    <h4 className="font-semibold mb-2 text-foreground">All Attempts</h4>
+                    {/* Scrollable attempts container */}
+                    <div className="max-h-80 overflow-y-auto border border-border rounded-lg">
+                      <div className="space-y-1 p-2">
                         {test.recentAttempts
                           .sort((a, b) => {
                             // Sort by pass/fail status first (passed first), then by percentage descending
@@ -500,43 +497,57 @@ export default function AdminResultsDashboard() {
                           .map((attempt, index) => (
                           <div key={index} className={`flex justify-between items-center py-3 px-4 rounded-lg border-2 ${
                             attempt.passed
-                              ? 'bg-green-50 border-green-200'
-                              : 'bg-red-50 border-red-200'
+                              ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+                              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
                           }`}>
                             <div className="flex items-center gap-2">
                               {attempt.passed ? (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                               ) : (
-                                <XCircle className="h-4 w-4 text-red-600" />
+                                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                               )}
                               <div>
-                                <span className="font-medium text-gray-900">{attempt.studentName}</span>
-                                <span className="text-sm text-gray-600 ml-2">
+                                <span className="font-medium text-foreground">{attempt.studentName}</span>
+                                <span className="text-sm text-muted-foreground ml-2">
                                   ({attempt.studentEmail})
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right">
-                                <div className={`font-semibold ${attempt.passed ? 'text-green-700' : 'text-red-700'}`}>
+                                <div className={`font-semibold ${
+                                  attempt.passed
+                                    ? 'text-green-700 dark:text-green-300'
+                                    : 'text-red-700 dark:text-red-300'
+                                }`}>
                                   {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
                                 </div>
-                                <div className={`text-xs ${attempt.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                <div className={`text-xs ${
+                                  attempt.passed
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                }`}>
                                   {attempt.passed ? 'PASSED' : 'FAILED'}
                                 </div>
                               </div>
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-muted-foreground">
                                 {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
                               </span>
                             </div>
                           </div>
                         ))}
                       </div>
-                      {test.recentAttempts.length > 3 && (
-                        <div className="text-center py-2 text-xs text-gray-500">
-                          Showing all {test.recentAttempts.length} attempts (scroll to see more)
-                        </div>
-                      )}
+                    </div>
+                    {/* View detailed analysis button */}
+                    <div className="text-center mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(test.id)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Detailed Analysis
+                      </Button>
                     </div>
                   </div>
                 )}
