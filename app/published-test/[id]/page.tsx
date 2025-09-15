@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Quiz } from "@/components/quiz"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,6 +36,7 @@ export default function PublishedTestPage() {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const hasSubmittedRef = useRef(false)
 
   const fetchTestData = useCallback(async () => {
     try {
@@ -61,9 +62,11 @@ export default function PublishedTestPage() {
   }, [testId])
 
   const handleSubmitQuiz = useCallback(async (answers: Record<number, string>) => {
-    if (!testData || isSubmitting) return
+    if (!testData || hasSubmittedRef.current) return
 
+    hasSubmittedRef.current = true
     setIsSubmitting(true)
+
     try {
       const response = await fetch('/api/published-tests/submit', {
         method: 'POST',
@@ -84,14 +87,16 @@ export default function PublishedTestPage() {
         const errorData = await response.json()
         console.error('Error submitting test:', errorData.error)
         alert('Error submitting test: ' + errorData.error)
+        hasSubmittedRef.current = false
         setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error submitting test:', error)
       alert('Error submitting test. Please try again.')
+      hasSubmittedRef.current = false
       setIsSubmitting(false)
     }
-  }, [testData, testId, router, isSubmitting])
+  }, [testData, testId, router])
 
   const handleStartTest = () => {
     setHasStarted(true)
@@ -114,25 +119,29 @@ export default function PublishedTestPage() {
     }
   }, [session, testId, fetchTestData])
 
-  // Timer effect
+  // Timer effect - only start when test begins
   useEffect(() => {
     let interval: NodeJS.Timeout
-    if (hasStarted && timeRemaining !== null && timeRemaining > 0 && !isSubmitting) {
+
+    if (hasStarted && timeRemaining !== null && timeRemaining > 0) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev === null || prev <= 1) {
-            // Time's up - auto submit
-            handleSubmitQuiz({})
+            // Time's up - auto submit if not already submitted
+            if (!hasSubmittedRef.current) {
+              setTimeout(() => handleSubmitQuiz({}), 0)
+            }
             return 0
           }
           return prev - 1
         })
       }, 1000)
     }
+
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [hasStarted, handleSubmitQuiz, isSubmitting])
+  }, [hasStarted]) // Only depend on hasStarted, not timeRemaining
 
   if (status === "loading" || isLoading) {
     return (
