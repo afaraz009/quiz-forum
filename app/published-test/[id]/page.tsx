@@ -36,32 +36,6 @@ export default function PublishedTestPage() {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (session?.user && testId) {
-      fetchTestData()
-    }
-  }, [session, testId, fetchTestData])
-
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-    if (hasStarted && timeRemaining !== null && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev === null || prev <= 1) {
-            // Time's up - auto submit
-            handleSubmitQuiz({})
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-    }
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [hasStarted, timeRemaining, handleSubmitQuiz])
-
   const fetchTestData = useCallback(async () => {
     try {
       const response = await fetch(`/api/published-tests/${testId}`)
@@ -84,10 +58,6 @@ export default function PublishedTestPage() {
       setIsLoading(false)
     }
   }, [testId])
-
-  const handleStartTest = () => {
-    setHasStarted(true)
-  }
 
   const handleSubmitQuiz = useCallback(async (answers: Record<number, string>) => {
     if (!testData) return
@@ -119,6 +89,10 @@ export default function PublishedTestPage() {
     }
   }, [testData, testId, router])
 
+  const handleStartTest = () => {
+    setHasStarted(true)
+  }
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -129,6 +103,32 @@ export default function PublishedTestPage() {
     }
     return `${minutes}:${secs.toString().padStart(2, '0')}`
   }
+
+  useEffect(() => {
+    if (session?.user && testId) {
+      fetchTestData()
+    }
+  }, [session, testId, fetchTestData])
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (hasStarted && timeRemaining !== null && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev === null || prev <= 1) {
+            // Time's up - auto submit
+            handleSubmitQuiz({})
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [hasStarted, timeRemaining, handleSubmitQuiz])
 
   if (status === "loading" || isLoading) {
     return (

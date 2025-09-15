@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get session to ensure user is authenticated
@@ -26,10 +26,13 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // Await params for Next.js 15 compatibility
+    const { id } = await params
+
     // Fetch the published test
     const test = await prisma.publishedTest.findFirst({
       where: {
-        id: params.id,
+        id: id,
         isPublished: true
       },
       include: {
