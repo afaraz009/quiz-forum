@@ -486,57 +486,55 @@ export default function AdminResultsDashboard() {
                   <div>
                     <h4 className="font-semibold mb-2 text-gray-900">Recent Attempts</h4>
                     <div className="space-y-2">
-                      {test.recentAttempts
-                        .sort((a, b) => {
-                          // Sort by pass/fail status first (passed first), then by percentage descending
-                          if (a.passed !== b.passed) return b.passed ? 1 : -1
-                          return b.percentage - a.percentage
-                        })
-                        .slice(0, 3)
-                        .map((attempt, index) => (
-                        <div key={index} className={`flex justify-between items-center py-3 px-4 rounded-lg border-2 ${
-                          attempt.passed
-                            ? 'bg-green-50 border-green-200'
-                            : 'bg-red-50 border-red-200'
-                        }`}>
-                          <div className="flex items-center gap-2">
-                            {attempt.passed ? (
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <XCircle className="h-4 w-4 text-red-600" />
-                            )}
-                            <div>
-                              <span className="font-medium text-gray-900">{attempt.studentName}</span>
-                              <span className="text-sm text-gray-600 ml-2">
-                                ({attempt.studentEmail})
+                      <div className={`space-y-2 ${
+                        test.recentAttempts.length > 3
+                          ? 'max-h-96 overflow-y-auto pr-2'
+                          : ''
+                      }`}>
+                        {test.recentAttempts
+                          .sort((a, b) => {
+                            // Sort by pass/fail status first (passed first), then by percentage descending
+                            if (a.passed !== b.passed) return b.passed ? 1 : -1
+                            return b.percentage - a.percentage
+                          })
+                          .map((attempt, index) => (
+                          <div key={index} className={`flex justify-between items-center py-3 px-4 rounded-lg border-2 ${
+                            attempt.passed
+                              ? 'bg-green-50 border-green-200'
+                              : 'bg-red-50 border-red-200'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              {attempt.passed ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-600" />
+                              )}
+                              <div>
+                                <span className="font-medium text-gray-900">{attempt.studentName}</span>
+                                <span className="text-sm text-gray-600 ml-2">
+                                  ({attempt.studentEmail})
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <div className={`font-semibold ${attempt.passed ? 'text-green-700' : 'text-red-700'}`}>
+                                  {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
+                                </div>
+                                <div className={`text-xs ${attempt.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                  {attempt.passed ? 'PASSED' : 'FAILED'}
+                                </div>
+                              </div>
+                              <span className="text-sm text-gray-600">
+                                {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <div className={`font-semibold ${attempt.passed ? 'text-green-700' : 'text-red-700'}`}>
-                                {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
-                              </div>
-                              <div className={`text-xs ${attempt.passed ? 'text-green-600' : 'text-red-600'}`}>
-                                {attempt.passed ? 'PASSED' : 'FAILED'}
-                              </div>
-                            </div>
-                            <span className="text-sm text-gray-600">
-                              {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                       {test.recentAttempts.length > 3 && (
-                        <div className="text-center py-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(test.id)}
-                            className="text-gray-700 hover:text-gray-900"
-                          >
-                            View all {test.completedAttempts} attempts
-                          </Button>
+                        <div className="text-center py-2 text-xs text-gray-500">
+                          Showing all {test.recentAttempts.length} attempts (scroll to see more)
                         </div>
                       )}
                     </div>
