@@ -120,74 +120,17 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-6xl">
-      <div className="text-center mb-16 animate-slide-up">
-        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium border border-primary/20 mb-6">
-          🚀 Knowledge Testing Platform
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-          Knowledge Test Forum
-        </h1>
-        <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
-          Create and take interactive quizzes with seamless file upload, real-time feedback, and comprehensive progress tracking.
-        </p>
-      </div>
-
+    <div className="container mx-auto px-6 py-12 max-w-3xl">
       {!isLoaded ? (
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-gradient-card border border-border/50 rounded-2xl p-8 mb-8 shadow-lg hover:shadow-xl transition-all duration-300 animate-scale-in">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                📤
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Upload Quiz Questions</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Upload a JSON file containing quiz questions. The file should be formatted with questions, options, and correct answers.
-              </p>
-            </div>
-            <FileUploader onFileUpload={handleFileUpload} />
+        <div className="bg-gradient-card border border-border/50 rounded-2xl p-8 mb-8 shadow-lg hover:shadow-xl transition-all duration-300 animate-scale-in">
+          <div className="text-center mb-6">
+            {/* Removed emoji above Upload Quiz Questions */}
+            <h2 className="text-2xl font-bold mb-2">Upload Quiz Questions</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Upload a JSON file containing quiz questions. The file should be formatted with questions, options, and correct answers.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-            <div className="p-6 rounded-xl bg-card border hover:shadow-md transition-all duration-300">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                ✨ Smart Features
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                  Instant quiz generation from JSON files
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                  Real-time scoring and feedback
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                  Progress tracking and analytics
-                </li>
-              </ul>
-            </div>
-            <div className="p-6 rounded-xl bg-card border hover:shadow-md transition-all duration-300">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                🎯 Easy Process
-              </h3>
-              <ol className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-medium">1</span>
-                  Upload your quiz JSON file
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-medium">2</span>
-                  Take the interactive quiz
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-medium">3</span>
-                  View results and track progress
-                </li>
-              </ol>
-            </div>
-          </div>
+          <FileUploader onFileUpload={handleFileUpload} />
         </div>
       ) : (
         <div className="animate-fade-in">

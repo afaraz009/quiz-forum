@@ -133,9 +133,10 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   }
   Guidelines:
   - Generate 10 MCQ questions
-  - Use ONLY the tenses [Present Simple, Present Continuous, Past Simple, Past Continuous].
+  - Use ONLY the tenses [Present Simple, Present Continuous, Present Perfect, Present Perfect Continuous].
   - Randomly generate short, everyday sentences in clear English.
   - Each sentence must reflect one of the provided tenses.
+  - Add negative and interrogative forms in some questions.
   - Always include 4 unique options (no duplicates).
   - Ensure the correct answer is in one of the options.
   - Output a valid JSON array containing as many questions as the user requests.
