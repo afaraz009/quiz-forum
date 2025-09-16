@@ -54,6 +54,7 @@ export default function AdminResultsDashboard() {
   const [deletingTestId, setDeletingTestId] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set())
+  const [selectedTest, setSelectedTest] = useState<TestAnalytics | null>(null)
 
   const fetchTestsAnalytics = useCallback(async () => {
     try {
@@ -182,7 +183,23 @@ export default function AdminResultsDashboard() {
     }
   }
 
-  const calculateOverallStats = () => {
+  const calculateDisplayStats = () => {
+    // If a specific test is selected, show stats for that test
+    if (selectedTest) {
+      return {
+        totalTests: 1,
+        totalAttempts: selectedTest.completedAttempts,
+        averageCompletion: selectedTest.completionRate,
+        averageScore: selectedTest.averageScore,
+        totalPassed: selectedTest.passedAttempts,
+        totalFailed: selectedTest.failedAttempts,
+        overallPassRate: selectedTest.passRate,
+        isTestSpecific: true,
+        testTitle: selectedTest.title
+      }
+    }
+
+    // Otherwise show overall stats across all tests
     if (testsAnalytics.length === 0) return {
       totalTests: 0,
       totalAttempts: 0,
@@ -190,7 +207,8 @@ export default function AdminResultsDashboard() {
       averageScore: 0,
       totalPassed: 0,
       totalFailed: 0,
-      overallPassRate: 0
+      overallPassRate: 0,
+      isTestSpecific: false
     }
 
     const totalTests = testsAnalytics.length
@@ -208,11 +226,20 @@ export default function AdminResultsDashboard() {
       averageScore,
       totalPassed,
       totalFailed,
-      overallPassRate
+      overallPassRate,
+      isTestSpecific: false
     }
   }
 
-  const overallStats = calculateOverallStats()
+  const displayStats = calculateDisplayStats()
+
+  const handleTestSelect = (test: TestAnalytics) => {
+    setSelectedTest(test)
+  }
+
+  const handleClearSelection = () => {
+    setSelectedTest(null)
+  }
 
   if (isLoading) {
     return (
@@ -233,77 +260,94 @@ export default function AdminResultsDashboard() {
             Results Analytics Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">
-            Comprehensive view of student performance across all published tests
+            {displayStats.isTestSpecific
+              ? `Analytics for: ${displayStats.testTitle}`
+              : "Comprehensive view of student performance across all published tests"
+            }
           </p>
+          {displayStats.isTestSpecific && (
+            <Button
+              onClick={handleClearSelection}
+              variant="outline"
+              size="sm"
+              className="mt-2"
+            >
+              Show All Tests Analytics
+            </Button>
+          )}
         </div>
         <Button onClick={() => router.push("/admin")} variant="outline">
           Back to Admin
         </Button>
       </div>
 
-      {/* Overall Statistics */}
+      {/* Analytics Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Tests</p>
-                <p className="text-2xl font-bold">{overallStats.totalTests}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {displayStats.isTestSpecific ? "Selected Test" : "Total Tests"}
+                </p>
+                <p className="text-2xl font-bold">{displayStats.totalTests}</p>
               </div>
               <BarChart3 className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Attempts</p>
-                <p className="text-2xl font-bold">{overallStats.totalAttempts}</p>
+                <p className="text-2xl font-bold">{displayStats.totalAttempts}</p>
               </div>
               <Users className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Avg. Score</p>
-                <p className="text-2xl font-bold">{overallStats.averageScore.toFixed(1)}%</p>
+                <p className="text-2xl font-bold">{displayStats.averageScore.toFixed(1)}%</p>
               </div>
               <BarChart3 className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Students Passed</p>
-                <p className="text-2xl font-bold text-green-600">{overallStats.totalPassed}</p>
+                <p className="text-2xl font-bold text-green-600">{displayStats.totalPassed}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Students Failed</p>
-                <p className="text-2xl font-bold text-red-600">{overallStats.totalFailed}</p>
+                <p className="text-2xl font-bold text-red-600">{displayStats.totalFailed}</p>
               </div>
               <XCircle className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Overall Pass Rate</p>
-                <p className="text-2xl font-bold text-blue-600">{overallStats.overallPassRate.toFixed(1)}%</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {displayStats.isTestSpecific ? "Pass Rate" : "Overall Pass Rate"}
+                </p>
+                <p className="text-2xl font-bold text-blue-600">{displayStats.overallPassRate.toFixed(1)}%</p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-500" />
             </div>
@@ -340,7 +384,18 @@ export default function AdminResultsDashboard() {
         </CardContent>
       </Card>
 
-      {/* Tests Analytics */}
+      {/* Test Selection and Results */}
+      <div className="mb-4">
+        <h2 className="text-2xl font-semibold mb-2">
+          {displayStats.isTestSpecific ? "All Published Tests" : "Select a Test for Detailed Analytics"}
+        </h2>
+        <p className="text-muted-foreground">
+          {displayStats.isTestSpecific
+            ? "The analytics above show data for the selected test. Click 'Select Analytics' on any other test to view its data."
+            : "Click 'Select Analytics' on any test below to view its specific statistics in the dashboard above."
+          }
+        </p>
+      </div>
       <div className="space-y-6">
         {filteredTests.length === 0 ? (
           <Card>
@@ -357,7 +412,11 @@ export default function AdminResultsDashboard() {
           </Card>
         ) : (
           filteredTests.map((test) => (
-            <Card key={test.id} className="border-l-4 border-l-blue-500">
+            <Card key={test.id} className={`border-l-4 ${
+              selectedTest?.id === test.id
+                ? "border-l-readwise-accent-blue bg-primary/5"
+                : "border-l-blue-500"
+            }`}>
               <CardHeader
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 onClick={() => toggleTestExpanded(test.id)}
@@ -384,6 +443,15 @@ export default function AdminResultsDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      size="sm"
+                      variant={selectedTest?.id === test.id ? "default" : "outline"}
+                      onClick={() => selectedTest?.id === test.id ? handleClearSelection() : handleTestSelect(test)}
+                      className="gap-1"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      {selectedTest?.id === test.id ? "Selected" : "Select Analytics"}
+                    </Button>
                     <Button
                       size="sm"
                       onClick={() => handleViewDetails(test.id)}
