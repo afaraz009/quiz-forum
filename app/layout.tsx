@@ -18,16 +18,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Providers>
-          <div className="min-h-screen bg-background">
-            <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
+          <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+            <header className="sticky top-0 z-50 glass border-b border-border/50">
               <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                <Link href="/">
-                  <h1 className="text-xl font-semibold tracking-tight">Quiz Forum</h1>
+                <Link href="/" className="group">
+                  <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-200">
+                    Quiz Forum
+                  </h1>
                 </Link>
                 <UserNav />
               </div>
             </header>
-            <main className="flex-1">
+            <main className="flex-1 animate-fade-in">
               {children}
             </main>
           </div>
