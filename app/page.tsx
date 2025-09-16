@@ -52,13 +52,15 @@ export default function Home() {
 
   if (!session) {
     return (
-      <div className="container mx-auto p-4 md:p-8 max-w-4xl">
-        <div className="text-center space-y-6 min-h-[400px] flex flex-col justify-center">
-          <h1 className="text-3xl font-bold">Welcome to Quiz Forum</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Please sign in to access the quiz functionality and track your progress.
-          </p>
-          <Button onClick={() => router.push("/login")} size="lg">
+      <div className="container mx-auto px-6 py-8 max-w-4xl">
+        <div className="text-center space-y-8 min-h-[500px] flex flex-col justify-center">
+          <div>
+            <h1 className="text-4xl font-semibold mb-4 tracking-tight">Welcome to Quiz Forum</h1>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              Please sign in to access the quiz functionality and track your progress.
+            </p>
+          </div>
+          <Button onClick={() => router.push("/login")} size="lg" className="rounded-lg text-base px-8 py-3">
             Sign In to Continue
           </Button>
         </div>
@@ -67,36 +69,41 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6 text-center">Knowledge Test Forum</h1>
+    <div className="container mx-auto px-6 py-8 max-w-4xl">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-semibold mb-4 tracking-tight">Knowledge Test Forum</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Create and take interactive quizzes with seamless file upload and progress tracking.
+        </p>
+      </div>
 
       {!isLoaded ? (
-        <div className="bg-card rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Upload Quiz Questions</h2>
-          <p className="mb-4 text-muted-foreground">
+        <div className="bg-card border border-border rounded-lg p-8 mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Upload Quiz Questions</h2>
+          <p className="mb-6 text-muted-foreground leading-relaxed">
             Upload a JSON file containing quiz questions. The file should be formatted with questions, options, and
             correct answers.
           </p>
           <FileUploader onFileUpload={handleFileUpload} />
-
-         
         </div>
       ) : (
         <>
-          <div className="mb-4 flex justify-between items-center">
-            <Button variant="outline" onClick={() => setIsLoaded(false)}>
+          <div className="mb-6 flex justify-between items-center">
+            <Button variant="outline" onClick={() => setIsLoaded(false)} className="rounded-lg">
               Load New Quiz
             </Button>
-            {!savedQuizId && (
-              <Button onClick={handleSaveQuiz}>
-                Save Quiz
-              </Button>
-            )}
-            {savedQuizId && (
-              <Button variant="outline" onClick={() => router.push("/dashboard")}>
-                View Dashboard
-              </Button>
-            )}
+            <div className="flex gap-3">
+              {!savedQuizId && (
+                <Button onClick={handleSaveQuiz} className="rounded-lg">
+                  Save Quiz
+                </Button>
+              )}
+              {savedQuizId && (
+                <Button variant="outline" onClick={() => router.push("/dashboard")} className="rounded-lg">
+                  View Dashboard
+                </Button>
+              )}
+            </div>
           </div>
           <Quiz questions={questions} savedQuizId={savedQuizId} onQuizComplete={handleQuizComplete} />
           <QuizSaveDialog

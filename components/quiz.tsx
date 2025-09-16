@@ -108,14 +108,32 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
     <div className={`bg-background border rounded-lg shadow-md p-6 ${
       isAssessmentMode ? 'border-orange-300 bg-orange-50/10' : ''
     }`}>
-      <h2 className="text-xl font-semibold mb-6 text-foreground flex items-center gap-2">
-        {title || "Quiz Questions"}
-        {isAssessmentMode && (
-          <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
-            Assessment Mode
-          </span>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+            {title || "Quiz Questions"}
+            {isAssessmentMode && (
+              <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+                Assessment Mode
+              </span>
+            )}
+          </h2>
+          {!submitted && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>{Object.keys(selectedAnswers).length} / {questions.length}</span>
+              <div className="text-xs text-muted-foreground">answered</div>
+            </div>
+          )}
+        </div>
+        {!submitted && (
+          <div className="w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-readwise-accent-blue h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(Object.keys(selectedAnswers).length / questions.length) * 100}%` }}
+            ></div>
+          </div>
         )}
-      </h2>
+      </div>
 
       <div className="space-y-8 mb-8">
         {questions.map((question, index) => (

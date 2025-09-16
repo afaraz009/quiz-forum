@@ -97,18 +97,18 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <Card className="w-full max-w-md border-border">
+        <CardHeader className="space-y-3 pb-6">
+          <CardTitle className="text-2xl text-center font-semibold tracking-tight">Create Account</CardTitle>
+          <CardDescription className="text-center text-muted-foreground">
             Join Quiz Forum to create and take interactive quizzes
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
               <Input
                 id="name"
                 name="name"
@@ -117,10 +117,11 @@ export default function SignupPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                className="rounded-lg"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-sm font-medium">Username</Label>
               <Input
                 id="username"
                 name="username"
@@ -129,10 +130,11 @@ export default function SignupPage() {
                 value={formData.username}
                 onChange={handleChange}
                 required
+                className="rounded-lg"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -141,10 +143,11 @@ export default function SignupPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                className="rounded-lg"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 name="password"
@@ -153,10 +156,11 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
                 required
+                className="rounded-lg"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -165,16 +169,17 @@ export default function SignupPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
+                className="rounded-lg"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full rounded-lg mt-6" disabled={isLoading}>
               {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
-          <div className="mt-4 text-center">
+          <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-primary hover:underline font-medium">
                 Sign in
               </Link>
             </p>

@@ -18,13 +18,15 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           <div className="min-h-screen bg-background">
-            <header className="border-b">
-              <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                <h1 className="text-xl font-bold">Quiz Forum</h1>
+            <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
+              <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 className="text-xl font-semibold tracking-tight">Quiz Forum</h1>
                 <UserNav />
               </div>
             </header>
-            <main>{children}</main>
+            <main className="flex-1">
+              {children}
+            </main>
           </div>
         </Providers>
       </body>

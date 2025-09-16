@@ -11,6 +11,26 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			// Readwise Reader inspired color palette
+  			readwise: {
+  				bg: {
+  					primary: '#0A0A0A',
+  					secondary: '#1A1A1A',
+  					surface: '#2A2A2A'
+  				},
+  				text: {
+  					primary: '#F5F5F5',
+  					secondary: '#A0A0A0',
+  					muted: '#606060'
+  				},
+  				accent: {
+  					blue: '#3B82F6',
+  					pink: '#EC4899',
+  					success: '#10B981',
+  					warning: '#F59E0B'
+  				},
+  				border: '#404040'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
