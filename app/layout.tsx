@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { UserNav } from '@/components/user-nav'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Quiz Forum',
@@ -20,7 +21,9 @@ export default function RootLayout({
           <div className="min-h-screen bg-background">
             <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
               <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 className="text-xl font-semibold tracking-tight">Quiz Forum</h1>
+                <Link href="/">
+                  <h1 className="text-xl font-semibold tracking-tight">Quiz Forum</h1>
+                </Link>
                 <UserNav />
               </div>
             </header>

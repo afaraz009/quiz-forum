@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { PublishedTestsTable } from "@/components/published-tests-table"
+import { PracticeQuizzesTable } from "@/components/practice-quizzes-table"
 
 interface QuizHistory {
   id: string
@@ -157,6 +159,23 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Get started with your quiz activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={() => router.push("/")} 
+                className="w-full"
+              >
+                Start New Quiz
+              </Button>
+            </CardContent>
+          </Card>
+
           {publishedTests.length > 0 && (
             <Card>
               <CardHeader>
@@ -171,103 +190,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {publishedTests.map((test) => (
-                    <div key={test.id} className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50/30">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg flex items-center gap-2">
-                            {test.title}
-                            {test.hasAttempted && (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                ✓ Completed
-                              </Badge>
-                            )}
-                            {test.isOverdue && !test.hasAttempted && (
-                              <Badge variant="destructive">
-                                Overdue
-                              </Badge>
-                            )}
-                          </h3>
-                          {test.description && (
-                            <p className="text-sm text-muted-foreground mb-2">{test.description}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            Created by {test.createdBy.name || test.createdBy.email}
-                          </p>
-                        </div>
-                        <Badge variant="secondary">{test.totalQuestions} questions</Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-                        {test.timeLimit && (
-                          <div>
-                            <p className="text-muted-foreground">Time Limit</p>
-                            <p className="font-medium">{test.timeLimit} minutes</p>
-                          </div>
-                        )}
-                        {test.dueDate && (
-                          <div>
-                            <p className="text-muted-foreground">Due Date</p>
-                            <p className="font-medium">
-                              {new Date(test.dueDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                        )}
-                        {test.hasAttempted && test.attempt && (
-                          <>
-                            <div>
-                              <p className="text-muted-foreground">Your Score</p>
-                              <p className="font-medium">
-                                {test.attempt.score !== null ? `${test.attempt.score}/${test.totalQuestions}` : "In Progress"}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Completed</p>
-                              <p className="font-medium">
-                                {test.attempt.completedAt
-                                  ? formatDistanceToNow(new Date(test.attempt.completedAt), { addSuffix: true })
-                                  : "In Progress"
-                                }
-                              </p>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        {test.canTakeTest ? (
-                          <Button
-                            size="sm"
-                            onClick={() => handleTakePublishedTest(test.id)}
-                            disabled={test.isOverdue && !test.allowLateSubmissions}
-                            className="bg-orange-600 hover:bg-orange-700"
-                          >
-                            {test.isOverdue ? "Take Test (Late)" : "Take Test"}
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" disabled>
-                            Already Attempted
-                          </Button>
-                        )}
-                        {test.hasAttempted && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/published-test/${test.id}/results`)}
-                          >
-                            View Results
-                          </Button>
-                        )}
-                      </div>
-                      {test.isOverdue && !test.allowLateSubmissions && !test.hasAttempted && (
-                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                          ⚠️ This test is overdue and late submissions are not allowed.
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <PublishedTestsTable tests={publishedTests} />
               </CardContent>
             </Card>
           )}
@@ -307,72 +230,8 @@ export default function DashboardPage() {
                   <p className="text-sm">Try a different search term.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {filteredQuizzes.map((quiz) => (
-                    <div key={quiz.id} className="border rounded-lg p-4 bg-card">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{quiz.title}</h3>
-                          {quiz.description && (
-                            <p className="text-sm text-muted-foreground mb-2">{quiz.description}</p>
-                          )}
-                        </div>
-                        <Badge variant="secondary">{quiz.totalQuestions} questions</Badge>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Highest Score</p>
-                          <p className="font-medium">{quiz.highestScore}/{quiz.totalQuestions}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Latest Score</p>
-                          <p className="font-medium">
-                            {quiz.latestScore !== null ? `${quiz.latestScore}/${quiz.totalQuestions}` : "No attempts"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Total Attempts</p>
-                          <p className="font-medium">{quiz.totalAttempts}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Last Taken</p>
-                          <p className="font-medium">
-                            {quiz.lastAttemptDate 
-                              ? formatDistanceToNow(new Date(quiz.lastAttemptDate), { addSuffix: true })
-                              : "Never"
-                            }
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleRetakeQuiz(quiz.id)}>
-                          Take Quiz
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}/history`)}>
-                          View History
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <PracticeQuizzesTable quizzes={filteredQuizzes} />
               )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Get started with your quiz activities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                onClick={() => router.push("/")} 
-                className="w-full"
-              >
-                Start New Quiz
-              </Button>
             </CardContent>
           </Card>
         </div>

@@ -48,6 +48,9 @@ export function UserNav() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer">
+            <a href="/" className="w-full">Start New Quiz</a>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
             <a href="/dashboard" className="w-full">Dashboard</a>
           </DropdownMenuItem>
           <DropdownMenuItem
