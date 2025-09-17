@@ -128,7 +128,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
         {!submitted && (
           <div className="w-full bg-muted rounded-full h-2">
             <div
-              className="bg-readwise-accent-blue h-2 rounded-full transition-all duration-300"
+              className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(Object.keys(selectedAnswers).length / questions.length) * 100}%` }}
             ></div>
           </div>

@@ -137,6 +137,8 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   - Randomly generate short, everyday sentences in clear English.
   - Each sentence must reflect one of the provided tenses.
   - Add negative and interrogative forms in some questions.
+  - Add some questions to test the correct use of "for" vs "since" in sentences with Present Perfect or Present Perfect Continuous tenses.
+    -For example, provide a sentence with a blank where "for" or "since" should be used (e.g., "She has been working ___ two hours" or "They have lived here ___ 2015" ). There should be just 2 options in this case
   - Always include 4 unique options (no duplicates).
   - Ensure the correct answer is in one of the options.
   - Output a valid JSON array containing as many questions as the user requests.

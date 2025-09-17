@@ -283,7 +283,7 @@ export default function AdminResultsDashboard() {
 
       {/* Analytics Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -296,7 +296,7 @@ export default function AdminResultsDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -307,7 +307,7 @@ export default function AdminResultsDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -318,7 +318,7 @@ export default function AdminResultsDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -329,7 +329,7 @@ export default function AdminResultsDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -340,7 +340,7 @@ export default function AdminResultsDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className={displayStats.isTestSpecific ? "border-readwise-accent-blue/50" : ""}>
+        <Card className={displayStats.isTestSpecific ? "border-primary/50" : ""}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -414,7 +414,7 @@ export default function AdminResultsDashboard() {
           filteredTests.map((test) => (
             <Card key={test.id} className={`border-l-4 ${
               selectedTest?.id === test.id
-                ? "border-l-readwise-accent-blue bg-primary/5"
+                ? "border-l-primary bg-primary/5"
                 : "border-l-blue-500"
             }`}>
               <CardHeader

@@ -28,12 +28,6 @@ export default function QuizRetakePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (session?.user && quizId) {
-      fetchQuiz()
-    }
-  }, [session, quizId, fetchQuiz])
-
   const fetchQuiz = useCallback(async () => {
     try {
       const response = await fetch(`/api/quiz/${quizId}`)
@@ -49,6 +43,12 @@ export default function QuizRetakePage() {
       setIsLoading(false)
     }
   }, [quizId])
+
+  useEffect(() => {
+    if (session?.user && quizId) {
+      fetchQuiz()
+    }
+  }, [session, quizId, fetchQuiz])
 
   if (status === "loading" || isLoading) {
     return (

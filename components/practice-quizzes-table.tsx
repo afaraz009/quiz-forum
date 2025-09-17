@@ -72,9 +72,6 @@ export function PracticeQuizzesTable({ quizzes }: PracticeQuizzesTableProps) {
                 <Button size="sm" onClick={() => handleRetakeQuiz(quiz.id)}>
                   Take Quiz
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}/history`)}>
-                  View History
-                </Button>
               </div>
             </TableCell>
           </TableRow>

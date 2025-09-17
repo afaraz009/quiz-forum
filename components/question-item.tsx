@@ -34,7 +34,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
       ? " border-2 border-green-500/50 bg-green-50/50 dark:bg-green-950/50"
       : " border-2 border-red-500/50 bg-red-50/50 dark:bg-red-950/50"
   } else if (isAnswered) {
-    cardClassName += " border-2 border-readwise-accent-blue/60 bg-primary/5"
+    cardClassName += " border-2 border-primary/60 bg-primary/5"
   } else {
     cardClassName += " border border-border"
   }
@@ -49,7 +49,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
           {!submitted && (
             <div className="flex items-center gap-1">
               {isAnswered ? (
-                <div className="w-2 h-2 rounded-full bg-readwise-accent-blue"></div>
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
               ) : (
                 <div className="w-2 h-2 rounded-full border border-muted-foreground"></div>
               )}
@@ -75,7 +75,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
             value={selectedAnswer || ''}
             onChange={(e) => onSelectAnswer(index, e.target.value)}
             disabled={submitted}
-            className={`rounded-lg ${submitted ? (isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'border-red-500 bg-red-50 dark:bg-red-950') : isAnswered ? 'border-readwise-accent-blue' : ''}`}
+            className={`rounded-lg ${submitted ? (isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'border-red-500 bg-red-50 dark:bg-red-950') : isAnswered ? 'border-primary' : ''}`}
           />
           {submitted && (
             <div className="text-sm space-y-1">
@@ -108,7 +108,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
               }
             } else if (isSelected) {
               // Selected state - this should override hover
-              optionClassName += " bg-readwise-accent-blue/10 border-readwise-accent-blue text-primary-foreground"
+              optionClassName += " bg-primary/10 border-primary text-primary-foreground"
             } else {
               // Unselected state with hover
               optionClassName += " border-border hover:bg-muted/50 hover:border-muted-foreground/30"
@@ -121,7 +121,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
                     value={option}
                     id={`q${index}-option${optionIndex}`}
                     disabled={submitted}
-                    className={`${isSelected && !submitted ? 'border-readwise-accent-blue text-readwise-accent-blue' : ''}`}
+                    className={`${isSelected && !submitted ? 'border-primary text-primary' : ''}`}
                   />
                   <span className="flex-grow text-card-foreground font-medium">
                     {option}
@@ -132,7 +132,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
                       <XCircle className="h-5 w-5 text-red-500" />
                     )}
                     {!submitted && isSelected && (
-                      <div className="w-2 h-2 rounded-full bg-readwise-accent-blue"></div>
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
                     )}
                   </div>
                 </div>
