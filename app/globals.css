@@ -276,4 +276,34 @@
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
+
+  /* Quiz protection - prevent text selection and copying */
+  .select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Additional protection for quiz content */
+  .quiz-content {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
+  }
+
+  /* Disable right-click context menu on quiz elements */
+  .quiz-content,
+  .quiz-content * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 }

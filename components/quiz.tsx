@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { QuizQuestion } from "@/types/quiz"
 import { Button } from "@/components/ui/button"
 import { QuestionItem } from "@/components/question-item"
@@ -22,6 +22,47 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
+
+  // Add protection against copying in assessment mode
+  useEffect(() => {
+    if (isAssessmentMode) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Prevent Ctrl+A (Select All), Ctrl+C (Copy), Ctrl+X (Cut), Ctrl+V (Paste)
+        if (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'x' || e.key === 'v')) {
+          e.preventDefault()
+          return false
+        }
+        // Prevent F12 (Developer Tools)
+        if (e.key === 'F12') {
+          e.preventDefault()
+          return false
+        }
+        // Prevent Ctrl+Shift+I (Developer Tools)
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+          e.preventDefault()
+          return false
+        }
+        // Prevent Ctrl+U (View Source)
+        if (e.ctrlKey && e.key === 'u') {
+          e.preventDefault()
+          return false
+        }
+      }
+
+      const handleContextMenu = (e: Event) => {
+        e.preventDefault()
+        return false
+      }
+
+      document.addEventListener('keydown', handleKeyDown)
+      document.addEventListener('contextmenu', handleContextMenu)
+      
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown)
+        document.removeEventListener('contextmenu', handleContextMenu)
+      }
+    }
+  }, [isAssessmentMode])
 
   const handleAnswerSelect = (questionIndex: number, answer: string) => {
     if (submitted || readonly) return
@@ -105,15 +146,28 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
   const allQuestionsAnswered = Object.keys(selectedAnswers).length === questions.length
 
   return (
-    <div className={`bg-background border rounded-lg shadow-md p-6 ${
+    <div className={`bg-background border rounded-lg shadow-md p-6 quiz-content ${
       isAssessmentMode ? 'border-orange-300 bg-orange-50/10' : ''
-    }`}>
+    }`}
+    onContextMenu={(e) => {
+      if (isAssessmentMode) {
+        e.preventDefault();
+        return false;
+      }
+    }}
+    onDragStart={(e) => {
+      if (isAssessmentMode) {
+        e.preventDefault();
+        return false;
+      }
+    }}
+    >
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2 select-none">
             {title || "Quiz Questions"}
             {isAssessmentMode && (
-              <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+              <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full select-none">
                 Assessment Mode
               </span>
             )}
@@ -121,7 +175,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
           {!submitted && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{Object.keys(selectedAnswers).length} / {questions.length}</span>
-              <div className="text-xs text-muted-foreground">answered</div>
+              <div className="text-xs text-muted-foreground select-none">answered</div>
             </div>
           )}
         </div>
@@ -166,7 +220,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
             </>
           ) : (
             <>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground select-none">
                 {allQuestionsAnswered
                   ? "All questions answered. Ready to submit!"
                   : `${Object.keys(selectedAnswers).length} of ${questions.length} questions answered`}
@@ -185,7 +239,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
       
       {readonly && (
         <div className="pt-4 border-t">
-          <div className="text-center text-muted-foreground">
+          <div className="text-center text-muted-foreground select-none">
             Preview mode - This is how students will see the test
           </div>
         </div>

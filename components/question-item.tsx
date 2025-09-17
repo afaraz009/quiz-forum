@@ -40,10 +40,19 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
   }
 
   return (
-    <div className={cardClassName}>
+    <div className={`${cardClassName} quiz-content`}
+    onContextMenu={(e) => {
+      e.preventDefault();
+      return false;
+    }}
+    onDragStart={(e) => {
+      e.preventDefault();
+      return false;
+    }}
+    >
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-medium text-card-foreground">
+          <h3 className="text-lg font-medium text-card-foreground select-none">
             Question {index + 1}: {question.question}
           </h3>
           {!submitted && (
@@ -79,11 +88,11 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
           />
           {submitted && (
             <div className="text-sm space-y-1">
-              <div className="text-muted-foreground">
+              <div className="text-muted-foreground select-none">
                 Correct answer: <span className="font-medium text-green-600 dark:text-green-400">{question.correctAnswer}</span>
               </div>
               {!isCorrect && selectedAnswer && (
-                <div className="text-muted-foreground">
+                <div className="text-muted-foreground select-none">
                   Your answer: <span className="font-medium text-red-600 dark:text-red-400">{selectedAnswer}</span>
                 </div>
               )}
@@ -123,7 +132,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
                     disabled={submitted}
                     className={`${isSelected && !submitted ? 'border-primary text-primary' : ''}`}
                   />
-                  <span className="flex-grow text-card-foreground font-medium">
+                  <span className="flex-grow text-card-foreground font-medium select-none">
                     {option}
                   </span>
                   <div className="flex-shrink-0">
