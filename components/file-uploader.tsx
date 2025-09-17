@@ -41,8 +41,8 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
 
       // If options are provided, validate as MCQ
       if (item.options) {
-        if (!Array.isArray(item.options) || item.options.length !== 4) {
-          throw new Error(`MCQ question "${item.question}" must have exactly 4 options`)
+        if (!Array.isArray(item.options) || item.options.length < 2) {
+          throw new Error(`MCQ question "${item.question}" must have at least 2 options`)
         }
 
         if (!item.options.includes(item.correctAnswer)) {

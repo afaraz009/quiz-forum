@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
       }
       
       // If options are provided, validate as MCQ
-      if (q.options && (!Array.isArray(q.options) || q.options.length !== 4)) {
-        throw new Error(`MCQ question at index ${index} must have exactly 4 options`)
+      if (q.options && (!Array.isArray(q.options) || q.options.length < 2)) {
+        throw new Error(`MCQ question at index ${index} must have at least 2 options`)
       }
       
       // If options are provided, correct answer must be in options
