@@ -67,7 +67,7 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Title</TableHead>
-          <TableHead>Questions</TableHead>
+          <TableHead>Marks/Questions</TableHead>
           <TableHead>Time Limit</TableHead>
           <TableHead>Published</TableHead>
           <TableHead>Score</TableHead>
@@ -82,7 +82,15 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
               <div className="font-medium">{test.title}</div>
               <div className="text-sm text-muted-foreground">{test.description}</div>
             </TableCell>
-            <TableCell>{test.totalQuestions}</TableCell>
+            <TableCell>
+              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                <div className="font-medium">
+                  {test.attempt.score}/{test.totalQuestions}
+                </div>
+              ) : (
+                <div className="text-muted-foreground">-/{test.totalQuestions}</div>
+              )}
+            </TableCell>
             <TableCell>{test.timeLimit ? `${test.timeLimit} minutes` : "N/A"}</TableCell>
             <TableCell>
               <div className="text-sm">
