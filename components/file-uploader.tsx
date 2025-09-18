@@ -140,6 +140,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   - Add some questions to test the correct use of "for" vs "since" in sentences with Present Perfect or Present Perfect Continuous tenses.
     -For example, provide a sentence with a blank where "for" or "since" should be used (e.g., "She has been working ___ two hours" or "They have lived here ___ 2015" ). There should be just 2 options in this case
   - Always include 4 unique options (no duplicates).
+  - Make sure you dont put the questions in a specific order like simple present first, continuous second, etc. Always shuffle the order of questions.
   - Ensure the correct answer is in one of the options.
   - Output a valid JSON array containing as many questions as the user requests.
   - Make sure to shuffle the position of correct answers in the options.
