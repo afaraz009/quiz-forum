@@ -46,14 +46,18 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
     router.push(`/published-test/${testId}`)
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-    if (score >= 70) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+  const calculatePercentage = (score: number, totalQuestions: number) => {
+    return Math.round((score / totalQuestions) * 100)
+  }
+
+  const getScoreColor = (percentage: number) => {
+    if (percentage >= 90) return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+    if (percentage >= 70) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
     return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
   }
 
-  const getPassFailStatus = (score: number) => {
-    const passed = score >= 70
+  const getPassFailStatus = (percentage: number) => {
+    const passed = percentage >= 70
     return {
       text: passed ? "Passed" : "Failed",
       className: passed 
@@ -102,18 +106,28 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
             </TableCell>
             <TableCell>
               {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
-                <Badge className={getScoreColor(test.attempt.score)}>
-                  {test.attempt.score}%
-                </Badge>
+                (() => {
+                  const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
+                  return (
+                    <Badge className={getScoreColor(percentage)}>
+                      {percentage}%
+                    </Badge>
+                  )
+                })()
               ) : (
                 <span className="text-muted-foreground text-sm">-</span>
               )}
             </TableCell>
             <TableCell>
               {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
-                <Badge className={getPassFailStatus(test.attempt.score).className}>
-                  {getPassFailStatus(test.attempt.score).text}
-                </Badge>
+                (() => {
+                  const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
+                  return (
+                    <Badge className={getPassFailStatus(percentage).className}>
+                      {getPassFailStatus(percentage).text}
+                    </Badge>
+                  )
+                })()
               ) : (
                 <Badge variant="outline">Not Attempted</Badge>
               )}

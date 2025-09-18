@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
 import { Quiz } from "@/components/quiz"
@@ -27,6 +27,9 @@ export default function QuizRetakePage() {
   const [quizData, setQuizData] = useState<QuizData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [answers, setAnswers] = useState<Record<number, string>>({})
+  const [showStickyHeader, setShowStickyHeader] = useState(false)
+  const quizRef = useRef<HTMLDivElement>(null)
 
   const fetchQuiz = useCallback(async () => {
     try {
@@ -44,11 +47,29 @@ export default function QuizRetakePage() {
     }
   }, [quizId])
 
+  const handleAnswerChange = useCallback((newAnswers: Record<number, string>) => {
+    setAnswers(newAnswers)
+  }, [])
+
   useEffect(() => {
     if (session?.user && quizId) {
       fetchQuiz()
     }
   }, [session, quizId, fetchQuiz])
+
+  // Scroll effect for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (quizRef.current) {
+        const rect = quizRef.current.getBoundingClientRect()
+        // Show sticky header when quiz content starts to scroll out of view
+        setShowStickyHeader(rect.top < -100)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   if (status === "loading" || isLoading) {
     return (
@@ -94,6 +115,31 @@ export default function QuizRetakePage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-4xl">
+      {/* Sticky Progress Header */}
+      {showStickyHeader && quizData && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
+          <div className="container mx-auto p-4 max-w-4xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-semibold">{quizData.title}</h2>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{Object.keys(answers).length} / {quizData.questions.length}</span>
+                  <span className="text-xs">answered</span>
+                </div>
+              </div>
+              <div className="w-32">
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(Object.keys(answers).length / quizData.questions.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button 
@@ -113,7 +159,14 @@ export default function QuizRetakePage() {
         </div>
       </div>
 
-      <Quiz questions={quizData.questions} savedQuizId={quizData.id} />
+      <div ref={quizRef}>
+        <Quiz 
+          questions={quizData.questions} 
+          savedQuizId={quizData.id} 
+          onAnswerChange={handleAnswerChange}
+          hideProgressBar={showStickyHeader}
+        />
+      </div>
     </div>
   )
 }

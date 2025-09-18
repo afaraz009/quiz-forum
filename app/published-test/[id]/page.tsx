@@ -36,8 +36,10 @@ export default function PublishedTestPage() {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showStickyHeader, setShowStickyHeader] = useState(false)
   const hasSubmittedRef = useRef(false)
   const currentAnswersRef = useRef<Record<number, string>>({})
+  const quizRef = useRef<HTMLDivElement>(null)
 
   const fetchTestData = useCallback(async () => {
     try {
@@ -126,6 +128,20 @@ export default function PublishedTestPage() {
       fetchTestData()
     }
   }, [session, testId, fetchTestData])
+
+  // Scroll effect for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (quizRef.current && hasStarted) {
+        const rect = quizRef.current.getBoundingClientRect()
+        // Show sticky header when quiz content starts to scroll out of view
+        setShowStickyHeader(rect.top < -100)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [hasStarted])
 
   // Timer effect - only start when test begins
   useEffect(() => {
@@ -303,6 +319,44 @@ export default function PublishedTestPage() {
   // Test taking screen
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-4xl">
+      {/* Sticky Progress and Timer Header */}
+      {showStickyHeader && testData && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-orange-50/95 backdrop-blur-sm border-b border-orange-200 shadow-sm">
+          <div className="container mx-auto p-4 max-w-4xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-semibold text-orange-900">{testData.title}</h2>
+                <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-200 text-xs">
+                  Assessment Mode
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-orange-700">
+                  <span>{Object.keys(currentAnswersRef.current).length} / {testData.questions.length}</span>
+                  <span className="text-xs">answered</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-32">
+                  <div className="w-full bg-orange-200 rounded-full h-2">
+                    <div
+                      className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(Object.keys(currentAnswersRef.current).length / testData.questions.length) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+                {timeRemaining !== null && (
+                  <div className="flex items-center gap-2">
+                    <Clock className={`h-4 w-4 ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`} />
+                    <span className={`text-sm font-mono ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`}>
+                      {formatTime(timeRemaining)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
         {/* Test header with timer */}
         <Card className="border-2 border-orange-200 bg-orange-50/30">
@@ -325,14 +379,17 @@ export default function PublishedTestPage() {
         </Card>
 
         {/* Quiz component */}
-        <Quiz
-          questions={testData.questions}
-          onSubmit={handleSubmitQuiz}
-          onAnswerChange={handleAnswerChange}
-          title={testData.title}
-          readonly={false}
-          isAssessmentMode={true}
-        />
+        <div ref={quizRef}>
+          <Quiz
+            questions={testData.questions}
+            onSubmit={handleSubmitQuiz}
+            onAnswerChange={handleAnswerChange}
+            title={testData.title}
+            readonly={false}
+            isAssessmentMode={true}
+            hideProgressBar={showStickyHeader}
+          />
+        </div>
       </div>
     </div>
   )

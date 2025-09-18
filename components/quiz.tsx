@@ -16,9 +16,10 @@ interface QuizProps {
   title?: string
   readonly?: boolean
   isAssessmentMode?: boolean
+  hideProgressBar?: boolean // Option to hide the built-in progress bar for sticky headers
 }
 
-export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswerChange, title, readonly = false, isAssessmentMode = false }: QuizProps) {
+export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswerChange, title, readonly = false, isAssessmentMode = false, hideProgressBar = false }: QuizProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
@@ -172,14 +173,14 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
               </span>
             )}
           </h2>
-          {!submitted && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{Object.keys(selectedAnswers).length} / {questions.length}</span>
-              <div className="text-xs text-muted-foreground select-none">answered</div>
-            </div>
-          )}
+        {!submitted && !hideProgressBar && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{Object.keys(selectedAnswers).length} / {questions.length}</span>
+            <div className="text-xs text-muted-foreground select-none">answered</div>
+          </div>
+        )}
         </div>
-        {!submitted && (
+        {!submitted && !hideProgressBar && (
           <div className="w-full bg-muted rounded-full h-2">
             <div
               className="bg-primary h-2 rounded-full transition-all duration-300"
