@@ -30,8 +30,6 @@ interface PublishedTest {
   title: string
   description: string | null
   timeLimit: number | null
-  dueDate: string | null
-  allowLateSubmissions: boolean
   createdBy: {
     name: string | null
     email: string
@@ -47,7 +45,6 @@ interface PublishedTest {
     createdAt: string
   } | null
   canTakeTest: boolean
-  isOverdue: boolean
 }
 
 export default function DashboardPage() {

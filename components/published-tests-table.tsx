@@ -18,8 +18,6 @@ interface PublishedTest {
   title: string
   description: string | null
   timeLimit: number | null
-  dueDate: string | null
-  allowLateSubmissions: boolean
   createdBy: {
     name: string | null
     email: string
@@ -35,7 +33,6 @@ interface PublishedTest {
     createdAt: string
   } | null
   canTakeTest: boolean
-  isOverdue: boolean
 }
 
 interface PublishedTestsTableProps {
@@ -49,6 +46,22 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
     router.push(`/published-test/${testId}`)
   }
 
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+    if (score >= 70) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+  }
+
+  const getPassFailStatus = (score: number) => {
+    const passed = score >= 70
+    return {
+      text: passed ? "Passed" : "Failed",
+      className: passed 
+        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
+        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+    }
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -56,7 +69,8 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
           <TableHead>Title</TableHead>
           <TableHead>Questions</TableHead>
           <TableHead>Time Limit</TableHead>
-          <TableHead>Due Date</TableHead>
+          <TableHead>Published</TableHead>
+          <TableHead>Score</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -70,14 +84,28 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
             </TableCell>
             <TableCell>{test.totalQuestions}</TableCell>
             <TableCell>{test.timeLimit ? `${test.timeLimit} minutes` : "N/A"}</TableCell>
-            <TableCell>{test.dueDate ? new Date(test.dueDate).toLocaleDateString() : "N/A"}</TableCell>
             <TableCell>
-              {test.hasAttempted ? (
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  ✓ Completed
+              <div className="text-sm">
+                {formatDistanceToNow(new Date(test.publishedAt), { addSuffix: true })}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {new Date(test.publishedAt).toLocaleDateString()}
+              </div>
+            </TableCell>
+            <TableCell>
+              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                <Badge className={getScoreColor(test.attempt.score)}>
+                  {test.attempt.score}%
                 </Badge>
-              ) : test.isOverdue ? (
-                <Badge variant="destructive">Overdue</Badge>
+              ) : (
+                <span className="text-muted-foreground text-sm">-</span>
+              )}
+            </TableCell>
+            <TableCell>
+              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                <Badge className={getPassFailStatus(test.attempt.score).className}>
+                  {getPassFailStatus(test.attempt.score).text}
+                </Badge>
               ) : (
                 <Badge variant="outline">Not Attempted</Badge>
               )}
@@ -88,10 +116,9 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                   <Button
                     size="sm"
                     onClick={() => handleTakePublishedTest(test.id)}
-                    disabled={test.isOverdue && !test.allowLateSubmissions}
                     className="bg-orange-600 hover:bg-orange-700"
                   >
-                    {test.isOverdue ? "Take Test (Late)" : "Take Test"}
+                    Take Test
                   </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>

@@ -309,8 +309,8 @@ export default function PublishedTestPage() {
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-xl font-bold">{testData.title}</h1>
-                <p className="text-sm text-muted-foreground">Assessment Mode - Single Attempt Only</p>
+                <h1 className="text-xl font-bold select-none">{testData.title}</h1>
+                <p className="text-sm text-muted-foreground select-none">Assessment Mode - Single Attempt Only</p>
               </div>
               {timeRemaining !== null && (
                 <div className="flex items-center gap-2">
