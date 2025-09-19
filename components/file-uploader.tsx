@@ -123,30 +123,33 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
   }
 
  
-  const samplePrompt = `You are a quiz generator.
-  Create a JSON array of multiple-choice quiz questions about identifying verb tenses.
-  Each element in the array must follow this format:
-  {
-    "question": "Identify tense: '<Sentence here>'",
-    "options": ["<Tense 1>", "<Tense 2>", "<Tense 3>", "<Tense 4>"],
-    "correctAnswer": "<The correct tense (must exactly match one from options)>"
-  }
-  Guidelines:
-  - Generate 10 MCQ questions
-  - Use ONLY the tenses [Present Simple, Present Continuous, Present Perfect, Present Perfect Continuous].
-  - Randomly generate short, everyday sentences in clear English.
-  - Each sentence must reflect one of the provided tenses.
-  - Add negative and interrogative forms in some questions.
-  - Add some questions to test the correct use of "for" vs "since" in sentences with Present Perfect or Present Perfect Continuous tenses.
-    -For example, provide a sentence with a blank where "for" or "since" should be used (e.g., "She has been working ___ two hours" or "They have lived here ___ 2015" ). There should be just 2 options in this case
-  - Always include 4 unique options (no duplicates).
-  - Make sure you dont put the questions in a specific order like simple present first, continuous second, etc. Always shuffle the order of questions.
-  - Ensure the correct answer is in one of the options.
-  - Output a valid JSON array containing as many questions as the user requests.
-  - Make sure to shuffle the position of correct answers in the options.
-  - In the options array keep the postion of each tense same for all questions
-  - Do not include explanations, comments, or extra text outside the JSON.`
+  const samplePrompt = `You are a quiz generator. Create a JSON array of multiple-choice quiz questions about translating Urdu sentences to English, focusing on verb tenses.
 
+Each element in the array must follow this format:
+
+{
+  "question": "ترجمہ کریں: '<Urdu sentence here>'",
+  "options": ["<English translation 1>", "<English translation 2>", "<English translation 3>", "<English translation 4>"],
+  "correctAnswer": "<The correct English translation (must exactly match one from options)>"
+}
+- Guidelines:
+-Generate 20 multiple-choice questions.
+-Write each question in Urdu, starting with "ترجمہ کریں:" followed by a short, everyday Urdu sentence.
+-Use ONLY the English tenses [Present Simple, Present Continuous, Present Perfect, Present Perfect Continuous] in the translation options.
+-Provide four unique English translation options for each question, each reflecting a different tense from the specified list, with only one being the correct translation of the Urdu sentence.
+-Add negative and interrogative forms in some questions.
+-For sentences using Present Perfect or Present Perfect Continuous, include some questions to test the correct use of "for" vs "since" by leaving a blank in the Urdu sentence (e.g., "وہ ___ دو گھنٹے سے پڑھ رہا ہے۔" or "وہ ___ 2022 سے یہاں رہ رہے ہیں۔"). For these questions:
+-Provide only two options: ["for", "since"].
+-The correct answer must be either "for" or "since" based on the context.
+-Shuffle the order of questions to avoid patterns (e.g., not grouping by tense).
+-Shuffle the position of the correct answer in the options for each question.
+-Keep the order of tenses in the options consistent across questions (e.g., Present Simple always first, Present Continuous second, etc.).
+-Ensure the correct answer exactly matches one of the options.
+-Output a valid JSON array containing the requested number of questions.
+-Do not include explanations, comments, or extra text outside the JSON.
+-Use clear, everyday Urdu sentences that are grammatically correct and natural.
+-Ensure translations in the options are accurate and reflect the appropriate tens
+`
 
 
 
