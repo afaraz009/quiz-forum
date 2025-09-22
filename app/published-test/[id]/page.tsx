@@ -37,6 +37,7 @@ export default function PublishedTestPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showStickyHeader, setShowStickyHeader] = useState(false)
+  const [currentAnswers, setCurrentAnswers] = useState<Record<number, string>>({})
   const hasSubmittedRef = useRef(false)
   const currentAnswersRef = useRef<Record<number, string>>({})
   const quizRef = useRef<HTMLDivElement>(null)
@@ -109,7 +110,9 @@ export default function PublishedTestPage() {
   }
 
   const handleAnswerChange = useCallback((answers: Record<number, string>) => {
+    console.log('Answer changed:', answers, 'Count:', Object.keys(answers).length)
     currentAnswersRef.current = answers
+    setCurrentAnswers(answers) // Update reactive state for sticky header
   }, [])
 
   const formatTime = (seconds: number) => {
@@ -321,7 +324,7 @@ export default function PublishedTestPage() {
     <div className="container mx-auto p-4 md:p-8 max-w-4xl">
       {/* Sticky Progress and Timer Header */}
       {showStickyHeader && testData && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-orange-50/95 backdrop-blur-sm border-b border-orange-200 shadow-sm">
+        <div key={`sticky-${Object.keys(currentAnswers).length}`} className="fixed top-0 left-0 right-0 z-50 bg-orange-50/95 backdrop-blur-sm border-b border-orange-200 shadow-sm">
           <div className="container mx-auto p-4 max-w-4xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -330,7 +333,7 @@ export default function PublishedTestPage() {
                   Assessment Mode
                 </Badge>
                 <div className="flex items-center gap-2 text-sm text-orange-700">
-                  <span>{Object.keys(currentAnswersRef.current).length} / {testData.questions.length}</span>
+                  <span>{Object.keys(currentAnswers).length} / {testData.questions.length}</span>
                   <span className="text-xs">answered</span>
                 </div>
               </div>
@@ -339,7 +342,7 @@ export default function PublishedTestPage() {
                   <div className="w-full bg-orange-200 rounded-full h-2">
                     <div
                       className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(Object.keys(currentAnswersRef.current).length / testData.questions.length) * 100}%` }}
+                      style={{ width: `${(Object.keys(currentAnswers).length / testData.questions.length) * 100}%` }}
                     ></div>
                   </div>
                 </div>
