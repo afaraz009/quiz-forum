@@ -135,20 +135,17 @@ Each element in the array must follow this format:
 - Guidelines:
 -Generate 20 multiple-choice questions.
 -Write each question in Urdu, starting with "ترجمہ کریں:" followed by a short, everyday Urdu sentence.
--Use ONLY the English tenses [Present Simple, Present Continuous, Present Perfect, Present Perfect Continuous] in the translation options.
+-Use ONLY the English tenses [Past Simple, Past Continuous, Past Perfect, Past Perfect Continuous] in the translation options.
 -Provide four unique English translation options for each question, each reflecting a different tense from the specified list, with only one being the correct translation of the Urdu sentence.
 -Add negative and interrogative forms in some questions.
--For sentences using Present Perfect or Present Perfect Continuous, include some questions to test the correct use of "for" vs "since" by leaving a blank in the Urdu sentence (e.g., "وہ ___ دو گھنٹے سے پڑھ رہا ہے۔" or "وہ ___ 2022 سے یہاں رہ رہے ہیں۔"). For these questions:
--Provide only two options: ["for", "since"].
--The correct answer must be either "for" or "since" based on the context.
 -Shuffle the order of questions to avoid patterns (e.g., not grouping by tense).
 -Shuffle the position of the correct answer in the options for each question.
--Keep the order of tenses in the options consistent across questions (e.g., Present Simple always first, Present Continuous second, etc.).
+-Shuffle the position of tenses in the options 
 -Ensure the correct answer exactly matches one of the options.
 -Output a valid JSON array containing the requested number of questions.
 -Do not include explanations, comments, or extra text outside the JSON.
 -Use clear, everyday Urdu sentences that are grammatically correct and natural.
--Ensure translations in the options are accurate and reflect the appropriate tens
+-Ensure translations in the options are accurate and reflect the appropriate tense
 `
 
 
