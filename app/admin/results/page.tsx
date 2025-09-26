@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react"
+import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { QuizQuestion } from "@/types/quiz"
 
 interface TestAnalytics {
   id: string
@@ -29,18 +30,21 @@ interface TestAnalytics {
   passedAttempts: number
   failedAttempts: number
   passRate: number
+  questions?: QuizQuestion[]
   scoreDistribution: {
     range: string
     count: number
     percentage: number
   }[]
   recentAttempts: {
+    id?: string
     studentName: string
     studentEmail: string
     score: number
     completedAt: string
     percentage: number
     passed: boolean
+    answers?: Record<string, string>
   }[]
 }
 
@@ -55,6 +59,9 @@ export default function AdminResultsDashboard() {
   const [deletingTestId, setDeletingTestId] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set())
+  const [sortConfig, setSortConfig] = useState<{[testId: string]: {key: string, direction: 'asc' | 'desc'}}>({});
+  const [selectedStudent, setSelectedStudent] = useState<{attempt: any, test: TestAnalytics} | null>(null)
+  const [showAnswerReview, setShowAnswerReview] = useState(false)
 
   const fetchTestsAnalytics = useCallback(async () => {
     try {
@@ -180,6 +187,107 @@ export default function AdminResultsDashboard() {
       console.error("Error deleting test:", error)
     } finally {
       setDeletingTestId(null)
+    }
+  }
+
+  const handleSort = (testId: string, key: string) => {
+    setSortConfig(prev => {
+      const currentSort = prev[testId]
+      const newDirection = currentSort?.key === key && currentSort.direction === 'asc' ? 'desc' : 'asc'
+      return {
+        ...prev,
+        [testId]: { key, direction: newDirection }
+      }
+    })
+  }
+
+  const getSortedAttempts = (attempts: any[], testId: string) => {
+    const sortCfg = sortConfig[testId]
+    if (!sortCfg) {
+      // Default sort: alphabetically by student name
+      return [...attempts].sort((a, b) => a.studentName.localeCompare(b.studentName))
+    }
+
+    return [...attempts].sort((a, b) => {
+      let aVal, bVal
+      
+      switch (sortCfg.key) {
+        case 'name':
+          aVal = a.studentName
+          bVal = b.studentName
+          break
+        case 'email':
+          aVal = a.studentEmail
+          bVal = b.studentEmail
+          break
+        case 'score':
+          aVal = a.score
+          bVal = b.score
+          break
+        case 'percentage':
+          aVal = a.percentage
+          bVal = b.percentage
+          break
+        case 'status':
+          aVal = a.passed ? 'PASS' : 'FAIL'
+          bVal = b.passed ? 'PASS' : 'FAIL'
+          break
+        default:
+          return 0
+      }
+
+      if (typeof aVal === 'string') {
+        const result = aVal.localeCompare(bVal)
+        return sortCfg.direction === 'asc' ? result : -result
+      } else {
+        const result = aVal - bVal
+        return sortCfg.direction === 'asc' ? result : -result
+      }
+    })
+  }
+
+  const getSortIcon = (testId: string, columnKey: string) => {
+    const sortCfg = sortConfig[testId]
+    if (!sortCfg || sortCfg.key !== columnKey) {
+      return <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+    }
+    return sortCfg.direction === 'asc' ? 
+      <ChevronUp className="h-4 w-4" /> : 
+      <ChevronDown className="h-4 w-4" />
+  }
+
+  const handleRowDoubleClick = async (attempt: any, test: TestAnalytics) => {
+    // Fetch detailed test data with questions if not available
+    if (!attempt.answers) {
+      try {
+        const response = await fetch(`/api/admin/analytics/tests/${test.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          // Find the specific attempt from the detailed data
+          const detailedAttempt = data.attempts.find((a: any) => 
+            a.user.email === attempt.studentEmail && 
+            a.score === attempt.score &&
+            Math.abs(new Date(a.completedAt).getTime() - new Date(attempt.completedAt).getTime()) < 60000
+          )
+          if (detailedAttempt) {
+            setSelectedStudent({ 
+              attempt: {
+                ...detailedAttempt,
+                studentName: attempt.studentName,
+                studentEmail: attempt.studentEmail,
+                passed: attempt.passed
+              }, 
+              test: { ...test, questions: data.test.questions }
+            })
+            setShowAnswerReview(true)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching detailed attempt data:', error)
+      }
+    } else {
+      setSelectedStudent({ attempt, test })
+      setShowAnswerReview(true)
     }
   }
 
@@ -421,25 +529,66 @@ export default function AdminResultsDashboard() {
                       <Table>
                         <TableHeader className="sticky top-0 bg-background">
                           <TableRow>
-                            <TableHead className="w-[50px]">Status</TableHead>
-                            <TableHead>Student Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead className="text-right">Score</TableHead>
-                            <TableHead className="text-right">Percentage</TableHead>
+                            <TableHead className="w-[50px]">Icon</TableHead>
+                            <TableHead 
+                              className="cursor-pointer select-none hover:bg-muted/50"
+                              onClick={() => handleSort(test.id, 'name')}
+                            >
+                              <div className="flex items-center gap-1">
+                                Student Name
+                                {getSortIcon(test.id, 'name')}
+                              </div>
+                            </TableHead>
+                            <TableHead 
+                              className="cursor-pointer select-none hover:bg-muted/50"
+                              onClick={() => handleSort(test.id, 'email')}
+                            >
+                              <div className="flex items-center gap-1">
+                                Email
+                                {getSortIcon(test.id, 'email')}
+                              </div>
+                            </TableHead>
+                            <TableHead 
+                              className="text-right cursor-pointer select-none hover:bg-muted/50"
+                              onClick={() => handleSort(test.id, 'score')}
+                            >
+                              <div className="flex items-center justify-end gap-1">
+                                Score
+                                {getSortIcon(test.id, 'score')}
+                              </div>
+                            </TableHead>
+                            <TableHead 
+                              className="text-right cursor-pointer select-none hover:bg-muted/50"
+                              onClick={() => handleSort(test.id, 'percentage')}
+                            >
+                              <div className="flex items-center justify-end gap-1">
+                                Percentage
+                                {getSortIcon(test.id, 'percentage')}
+                              </div>
+                            </TableHead>
+                            <TableHead 
+                              className="text-center cursor-pointer select-none hover:bg-muted/50"
+                              onClick={() => handleSort(test.id, 'status')}
+                            >
+                              <div className="flex items-center justify-center gap-1">
+                                Status
+                                {getSortIcon(test.id, 'status')}
+                              </div>
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {test.recentAttempts
-                            .sort((a, b) => {
-                              // Sort alphabetically by student name
-                              return a.studentName.localeCompare(b.studentName)
-                            })
+                          {getSortedAttempts(test.recentAttempts, test.id)
                             .map((attempt, index) => (
-                            <TableRow key={index} className={`${
-                              attempt.passed
-                                ? 'bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30'
-                                : 'bg-red-50/50 dark:bg-red-950/20 hover:bg-red-50 dark:hover:bg-red-950/30'
-                            }`}>
+                            <TableRow 
+                              key={index} 
+                              className={`cursor-pointer select-none ${
+                                attempt.passed
+                                  ? 'bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30'
+                                  : 'bg-red-50/50 dark:bg-red-950/20 hover:bg-red-50 dark:hover:bg-red-950/30'
+                              }`}
+                              onDoubleClick={() => handleRowDoubleClick(attempt, test)}
+                            >
                               <TableCell>
                                 {attempt.passed ? (
                                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -462,6 +611,14 @@ export default function AdminResultsDashboard() {
                                   : 'text-red-700 dark:text-red-300'
                               }`}>
                                 {attempt.percentage.toFixed(0)}%
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge 
+                                  variant={attempt.passed ? "default" : "destructive"}
+                                  className={attempt.passed ? "bg-green-600 hover:bg-green-700" : ""}
+                                >
+                                  {attempt.passed ? 'PASS' : 'FAIL'}
+                                </Badge>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -487,6 +644,90 @@ export default function AdminResultsDashboard() {
           ))
         )}
       </div>
+
+      {/* Answer Review Modal */}
+      {showAnswerReview && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <CardHeader className="border-b">
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>
+                    {selectedStudent.attempt.studentName || 'Unknown'} - Answer Review
+                  </CardTitle>
+                  <CardDescription>
+                    Score: {selectedStudent.attempt.score}/{selectedStudent.test.totalQuestions} ({selectedStudent.attempt.percentage.toFixed(0)}%)
+                    • Completed {formatDistanceToNow(new Date(selectedStudent.attempt.completedAt), { addSuffix: true })}
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => setShowAnswerReview(false)}>
+                  Close
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-6">
+                {selectedStudent.test.questions?.map((question, index) => {
+                  const userAnswer = selectedStudent.attempt.answers?.[index.toString()] || 'No answer'
+                  const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
+
+                  return (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="font-medium">Question {index + 1}</h4>
+                        {isCorrect ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-500" />
+                        )}
+                      </div>
+                      <p className="text-sm mb-3">{question.question}</p>
+
+                      {question.options && (
+                        <div className="mb-3">
+                          <p className="text-sm font-medium mb-2">Options:</p>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {question.options.map((option, optIdx) => (
+                              <div key={optIdx} className={`p-2 rounded ${
+                                option === question.correctAnswer ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                                option === userAnswer ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                                'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                              }`}>
+                                {option === question.correctAnswer && '✓ '}
+                                {option === userAnswer && option !== question.correctAnswer && '✗ '}
+                                {option}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="font-medium text-gray-600 dark:text-gray-400">Student Answer:</p>
+                          <p className={`p-2 rounded ${
+                            isCorrect 
+                              ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
+                              : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                          }`}>
+                            {userAnswer}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-600 dark:text-gray-400">Correct Answer:</p>
+                          <p className="p-2 rounded bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                            {question.correctAnswer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
