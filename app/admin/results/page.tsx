@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { BarChart3, Download, Search, Users, TrendingUp, Eye, Calendar, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
@@ -411,62 +412,61 @@ export default function AdminResultsDashboard() {
                   </div>
                 )}
 
-                {/* Recent Attempts */}
+                {/* All Attempts */}
                 {test.recentAttempts.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-2 text-foreground">All Attempts</h4>
-                    {/* Scrollable attempts container */}
+                    {/* Scrollable attempts table container */}
                     <div className="max-h-80 overflow-y-auto border border-border rounded-lg">
-                      <div className="space-y-1 p-2">
-                        {test.recentAttempts
-                          .sort((a, b) => {
-                            // Sort by pass/fail status first (passed first), then by percentage descending
-                            if (a.passed !== b.passed) return b.passed ? 1 : -1
-                            return b.percentage - a.percentage
-                          })
-                          .map((attempt, index) => (
-                          <div key={index} className={`flex justify-between items-center py-3 px-4 rounded-lg border-2 ${
-                            attempt.passed
-                              ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
-                              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
-                          }`}>
-                            <div className="flex items-center gap-2">
-                              {attempt.passed ? (
-                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                              )}
-                              <div>
-                                <span className="font-medium text-foreground">{attempt.studentName}</span>
-                                <span className="text-sm text-muted-foreground ml-2">
-                                  ({attempt.studentEmail})
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <div className={`font-semibold ${
-                                  attempt.passed
-                                    ? 'text-green-700 dark:text-green-300'
-                                    : 'text-red-700 dark:text-red-300'
-                                }`}>
-                                  {attempt.score}/{test.totalQuestions} ({attempt.percentage.toFixed(0)}%)
-                                </div>
-                                <div className={`text-xs ${
-                                  attempt.passed
-                                    ? 'text-green-600 dark:text-green-400'
-                                    : 'text-red-600 dark:text-red-400'
-                                }`}>
-                                  {attempt.passed ? 'PASSED' : 'FAILED'}
-                                </div>
-                              </div>
-                              <span className="text-sm text-muted-foreground">
-                                {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background">
+                          <TableRow>
+                            <TableHead className="w-[50px]">Status</TableHead>
+                            <TableHead>Student Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead className="text-right">Score</TableHead>
+                            <TableHead className="text-right">Percentage</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {test.recentAttempts
+                            .sort((a, b) => {
+                              // Sort alphabetically by student name
+                              return a.studentName.localeCompare(b.studentName)
+                            })
+                            .map((attempt, index) => (
+                            <TableRow key={index} className={`${
+                              attempt.passed
+                                ? 'bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30'
+                                : 'bg-red-50/50 dark:bg-red-950/20 hover:bg-red-50 dark:hover:bg-red-950/30'
+                            }`}>
+                              <TableCell>
+                                {attempt.passed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                )}
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                {attempt.studentName}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {attempt.studentEmail}
+                              </TableCell>
+                              <TableCell className="text-right font-semibold">
+                                {attempt.score}/{test.totalQuestions}
+                              </TableCell>
+                              <TableCell className={`text-right font-semibold ${
+                                attempt.passed
+                                  ? 'text-green-700 dark:text-green-300'
+                                  : 'text-red-700 dark:text-red-300'
+                              }`}>
+                                {attempt.percentage.toFixed(0)}%
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
                     {/* View detailed analysis button */}
                     <div className="text-center mt-3">
