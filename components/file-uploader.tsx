@@ -5,19 +5,12 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import type { QuizQuestion } from "@/types/quiz"
-import { AlertCircle, Copy, FileUp, Clipboard } from "lucide-react"
+import { AlertCircle, FileUp, Clipboard } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
+import { SamplePromptsTable } from "@/components/sample-prompts-table"
 
 interface FileUploaderProps {
   onFileUpload: (questions: QuizQuestion[]) => void
@@ -108,48 +101,6 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     }
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        toast({
-          title: "Copied to clipboard",
-          description: "Sample JSON has been copied to your clipboard",
-        })
-      },
-      (err) => {
-        console.error("Could not copy text: ", err)
-      },
-    )
-  }
-
- 
-  const samplePrompt = `You are a quiz generator. Create a JSON array of multiple-choice quiz questions about translating Urdu sentences to English, focusing on verb tenses.
-
-Each element in the array must follow this format:
-
-{
-  "question": "ترجمہ کریں: '<Urdu sentence here>'",
-  "options": ["<English translation 1>", "<English translation 2>", "<English translation 3>", "<English translation 4>"],
-  "correctAnswer": "<The correct English translation (must exactly match one from options)>"
-}
-- Guidelines:
--Generate 20 multiple-choice questions.
--Write each question in Urdu, starting with "ترجمہ کریں:" followed by a short, everyday Urdu sentence.
--Use ONLY the English tenses [Past Simple, Past Continuous, Past Perfect, Past Perfect Continuous] in the translation options.
--Provide four unique English translation options for each question, each reflecting a different tense from the specified list, with only one being the correct translation of the Urdu sentence.
--Add negative and interrogative forms in some questions.
--Shuffle the order of questions to avoid patterns (e.g., not grouping by tense).
--Shuffle the position of the correct answer in the options for each question.
--Shuffle the position of tenses in the options 
--Ensure the correct answer exactly matches one of the options.
--Output a valid JSON array containing the requested number of questions.
--Do not include explanations, comments, or extra text outside the JSON.
--Use clear, everyday Urdu sentences that are grammatically correct and natural.
--Ensure translations in the options are accurate and reflect the appropriate tense
-`
-
-
-
   return (
     <div className="w-full">
       <Tabs defaultValue="paste" className="w-full mb-4">
@@ -183,27 +134,8 @@ Each element in the array must follow this format:
         </Alert>
       )}
 
-      <div className="mt-6 flex justify-center">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">View Sample Prompt</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Sample Prompt for LLM</DialogTitle>
-              <DialogDescription>Copy this prompt to generate quiz questions with an AI assistant</DialogDescription>
-            </DialogHeader>
-            <div className="bg-muted p-4 rounded-md border">
-              <pre className="text-sm whitespace-pre-wrap text-muted-foreground">{samplePrompt}</pre>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button onClick={() => copyToClipboard(samplePrompt)}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Full Prompt
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+      <div className="mt-6">
+        <SamplePromptsTable onPromptSelect={(prompt) => setJsonText(prompt)} />
       </div>
 
      

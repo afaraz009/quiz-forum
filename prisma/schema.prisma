@@ -131,3 +131,14 @@ model TestAttempt {
   @@index([userId])
   @@index([publishedTestId])
 }
+
+model SamplePrompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  prompt      String   // The full prompt text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([title])
+}
