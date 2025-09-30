@@ -18,6 +18,7 @@ interface PublishedTest {
   title: string
   description: string | null
   timeLimit: number | null
+  passingPercentage: number
   createdBy: {
     name: string | null
     email: string
@@ -56,13 +57,24 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
     return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
   }
 
-  const getPassFailStatus = (percentage: number) => {
-    const passed = percentage >= 70
+  const getPassFailStatus = (percentage: number, passingThreshold: number) => {
+    const passed = percentage >= passingThreshold
+    // For assessment mode, use specific color coding based on memory specifications
+    // Green for 90-100%, Orange for 70-89% (if passed), Red for failed
+    let className: string
+    if (passed) {
+      if (percentage >= 90) {
+        className = "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+      } else {
+        className = "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+      }
+    } else {
+      className = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+    }
+    
     return {
       text: passed ? "Passed" : "Failed",
-      className: passed 
-        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+      className
     }
   }
 
@@ -123,8 +135,8 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                 (() => {
                   const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
                   return (
-                    <Badge className={getPassFailStatus(percentage).className}>
-                      {getPassFailStatus(percentage).text}
+                    <Badge className={getPassFailStatus(percentage, test.passingPercentage).className}>
+                      {getPassFailStatus(percentage, test.passingPercentage).text}
                     </Badge>
                   )
                 })()

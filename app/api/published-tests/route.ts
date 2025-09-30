@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
       title: test.title,
       description: test.description,
       timeLimit: test.timeLimit,
+      passingPercentage: test.passingPercentage,
       createdBy: test.createdBy,
       publishedAt: test.publishedAt,
       totalQuestions: JSON.parse(test.questions).length,

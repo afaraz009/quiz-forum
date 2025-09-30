@@ -30,6 +30,7 @@ interface PublishedTest {
   title: string
   description: string | null
   timeLimit: number | null
+  passingPercentage: number
   createdBy: {
     name: string | null
     email: string

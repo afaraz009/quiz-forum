@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import type { QuizQuestion } from "@/types/quiz"
 import { Button } from "@/components/ui/button"
 import { QuestionItem } from "@/components/question-item"
 import { CheckCircle, XCircle } from "lucide-react"
 import { toast } from "sonner"
+import { shuffleArrayWithSeed, generateSeed } from "@/lib/utils"
 
 interface QuizProps {
   questions: QuizQuestion[]
@@ -20,9 +22,41 @@ interface QuizProps {
 }
 
 export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswerChange, title, readonly = false, isAssessmentMode = false, hideProgressBar = false }: QuizProps) {
+  const { data: session } = useSession()
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
+  const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([])
+
+  // Shuffle options for each question based on user-specific seed
+  useEffect(() => {
+    if (questions.length > 0) {
+      const userId = session?.user?.email || 'anonymous'
+      const processedQuestions = questions.map((question, index) => {
+        // Only shuffle if question has options (MCQ)
+        if (question.options && question.options.length > 1) {
+          const seed = generateSeed(`${userId}-${question.question}-${index}`)
+          const shuffledOptions = shuffleArrayWithSeed(question.options, seed)
+          
+          // Find the new index of the correct answer after shuffling
+          const originalCorrectIndex = question.options.indexOf(question.correctAnswer)
+          const shuffledCorrectIndex = shuffledOptions.indexOf(question.correctAnswer)
+          
+          return {
+            ...question,
+            shuffledOptions,
+            originalCorrectIndex,
+            shuffledCorrectIndex
+          }
+        }
+        
+        // For short answer questions, no shuffling needed
+        return question
+      })
+      
+      setShuffledQuestions(processedQuestions)
+    }
+  }, [questions, session?.user?.email])
 
   // Add protection against copying in assessment mode
   useEffect(() => {
@@ -92,7 +126,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
       return
     }
 
-    const correctAnswers = questions.reduce((count, question, index) => {
+    const correctAnswers = shuffledQuestions.reduce((count, question, index) => {
       const userAnswer = selectedAnswers[index]
       if (!userAnswer) return count
 
@@ -122,7 +156,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
           body: JSON.stringify({
             quizId: savedQuizId,
             score: correctAnswers,
-            totalQuestions: questions.length,
+            totalQuestions: shuffledQuestions.length,
             answers: selectedAnswers,
           }),
         })
@@ -144,7 +178,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
     setScore(null)
   }
 
-  const allQuestionsAnswered = Object.keys(selectedAnswers).length === questions.length
+  const allQuestionsAnswered = Object.keys(selectedAnswers).length === shuffledQuestions.length
 
   return (
     <div className={`bg-background border rounded-lg shadow-md p-6 quiz-content ${
@@ -175,7 +209,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
           </h2>
         {!submitted && !hideProgressBar && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{Object.keys(selectedAnswers).length} / {questions.length}</span>
+            <span>{Object.keys(selectedAnswers).length} / {shuffledQuestions.length}</span>
             <div className="text-xs text-muted-foreground select-none">answered</div>
           </div>
         )}
@@ -184,14 +218,14 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
           <div className="w-full bg-muted rounded-full h-2">
             <div
               className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(Object.keys(selectedAnswers).length / questions.length) * 100}%` }}
+              style={{ width: `${(Object.keys(selectedAnswers).length / shuffledQuestions.length) * 100}%` }}
             ></div>
           </div>
         )}
       </div>
 
       <div className="space-y-8 mb-8">
-        {questions.map((question, index) => (
+        {shuffledQuestions.map((question, index) => (
           <QuestionItem
             key={index}
             question={question}
@@ -209,9 +243,9 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
             <>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-medium">
-                  Your Score: {score} / {questions.length}
+                  Your Score: {score} / {shuffledQuestions.length}
                 </span>
-                {score === questions.length ? (
+                {score === shuffledQuestions.length ? (
                   <CheckCircle className="h-6 w-6 text-green-500" />
                 ) : (
                   <XCircle className="h-6 w-6 text-red-500" />
@@ -224,7 +258,7 @@ export function Quiz({ questions, savedQuizId, onQuizComplete, onSubmit, onAnswe
               <div className="text-sm text-muted-foreground select-none">
                 {allQuestionsAnswered
                   ? "All questions answered. Ready to submit!"
-                  : `${Object.keys(selectedAnswers).length} of ${questions.length} questions answered`}
+                  : `${Object.keys(selectedAnswers).length} of ${shuffledQuestions.length} questions answered`}
               </div>
               <Button
                 onClick={handleSubmit}

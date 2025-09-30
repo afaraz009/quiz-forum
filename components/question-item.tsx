@@ -101,7 +101,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
         </div>
       ) : (
         <RadioGroup value={selectedAnswer} onValueChange={(value) => onSelectAnswer(index, value)} className="space-y-3">
-          {question.options?.map((option, optionIndex) => {
+          {(question.shuffledOptions || question.options)?.map((option, optionIndex) => {
             const isSelected = selectedAnswer === option
             const isCorrectAnswer = option === question.correctAnswer
 
