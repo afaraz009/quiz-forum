@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
 import { Quiz } from "@/components/quiz"
-import { QuizSaveDialog } from "@/components/quiz-save-dialog"
 import type { QuizQuestion } from "@/types/quiz"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
@@ -30,8 +29,6 @@ export default function QuizRetakePage() {
   const [error, setError] = useState<string | null>(null)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showStickyHeader, setShowStickyHeader] = useState(false)
-  const [showSaveDialog, setShowSaveDialog] = useState(false)
-  const [score, setScore] = useState<number | undefined>(undefined)
   const quizRef = useRef<HTMLDivElement>(null)
 
   const fetchQuiz = useCallback(async () => {
@@ -53,41 +50,6 @@ export default function QuizRetakePage() {
   const handleAnswerChange = useCallback((newAnswers: Record<number, string>) => {
     setAnswers(newAnswers)
   }, [])
-
-  const handleSubmitQuiz = useCallback(async () => {
-    if (!quizData) return
-
-    try {
-      const response = await fetch("/api/quiz/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          quizId: quizData.id,
-          score: 0, // Score will be calculated on the server
-          totalQuestions: quizData.questions.length,
-          answers,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setScore(data.score)
-        // Refresh to show results
-        fetchQuiz()
-      } else {
-        console.error("Failed to submit quiz")
-      }
-    } catch (error) {
-      console.error("Error submitting quiz:", error)
-    }
-  }, [answers, quizData, fetchQuiz])
-
-  const handleSaveSuccess = (savedQuizId: string) => {
-    // Redirect to dashboard or show success message
-    router.push("/dashboard")
-  }
 
   useEffect(() => {
     if (session?.user && quizId) {
@@ -174,22 +136,21 @@ export default function QuizRetakePage() {
                     ></div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowSaveDialog(true)}
-                  >
-                    Save Quiz
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={handleSubmitQuiz}
-                    disabled={Object.keys(answers).length === 0}
-                  >
-                    Submit
-                  </Button>
-                </div>
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    // Scroll to the submit button in the quiz component
+                    const quizElement = quizRef.current;
+                    if (quizElement) {
+                      const submitSection = quizElement.querySelector('.border-t');
+                      if (submitSection) {
+                        submitSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }
+                  }}
+                >
+                  Submit Quiz
+                </Button>
               </div>
             </div>
           </div>
@@ -213,22 +174,6 @@ export default function QuizRetakePage() {
             )}
           </div>
         </div>
-        {!showStickyHeader && (
-          <div className="flex gap-2">
-            <Button 
-              variant="outline"
-              onClick={() => setShowSaveDialog(true)}
-            >
-              Save Quiz
-            </Button>
-            <Button 
-              onClick={handleSubmitQuiz}
-              disabled={Object.keys(answers).length === 0}
-            >
-              Submit Quiz
-            </Button>
-          </div>
-        )}
       </div>
 
       <div ref={quizRef}>
@@ -239,15 +184,6 @@ export default function QuizRetakePage() {
           hideProgressBar={showStickyHeader}
         />
       </div>
-      
-      <QuizSaveDialog
-        isOpen={showSaveDialog}
-        onClose={() => setShowSaveDialog(false)}
-        questions={quizData.questions}
-        onSaveSuccess={handleSaveSuccess}
-        currentScore={score}
-        currentAnswers={answers}
-      />
     </div>
   )
 }

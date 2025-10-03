@@ -354,6 +354,22 @@ export default function PublishedTestPage() {
                     </span>
                   </div>
                 )}
+                <Button 
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={() => {
+                    // Scroll to the submit button in the quiz component
+                    const quizElement = quizRef.current;
+                    if (quizElement) {
+                      const submitSection = quizElement.querySelector('.border-t');
+                      if (submitSection) {
+                        submitSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }
+                  }}
+                >
+                  Submit Test
+                </Button>
               </div>
             </div>
           </div>
@@ -369,14 +385,33 @@ export default function PublishedTestPage() {
                 <h1 className="text-xl font-bold select-none">{testData.title}</h1>
                 <p className="text-sm text-muted-foreground select-none">Assessment Mode - Single Attempt Only</p>
               </div>
-              {timeRemaining !== null && (
-                <div className="flex items-center gap-2">
-                  <Clock className={`h-5 w-5 ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`} />
-                  <span className={`text-lg font-mono ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`}>
-                    {formatTime(timeRemaining)}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-4">
+                {timeRemaining !== null && (
+                  <div className="flex items-center gap-2">
+                    <Clock className={`h-5 w-5 ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`} />
+                    <span className={`text-lg font-mono ${timeRemaining < 300 ? 'text-red-500' : 'text-orange-600'}`}>
+                      {formatTime(timeRemaining)}
+                    </span>
+                  </div>
+                )}
+                {!showStickyHeader && (
+                  <Button 
+                    className="bg-orange-600 hover:bg-orange-700"
+                    onClick={() => {
+                      // Scroll to the submit button in the quiz component
+                      const quizElement = quizRef.current;
+                      if (quizElement) {
+                        const submitSection = quizElement.querySelector('.border-t');
+                        if (submitSection) {
+                          submitSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }
+                    }}
+                  >
+                    Submit Test
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
