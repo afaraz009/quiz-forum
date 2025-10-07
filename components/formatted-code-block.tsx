@@ -5,68 +5,59 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 interface FormattedCodeBlockProps {
   code: string;
-  language?: string;
 }
 
-export function FormattedCodeBlock({ code, language = 'text' }: FormattedCodeBlockProps) {
-  // If no code, return empty
-  if (!code) return null;
-
-  // Extract language from code block if not provided
-  const extractLanguageAndCode = (codeString: string) => {
-    // Match code blocks with language specification like ```js or ```javascript
-    const fencedMatch = codeString.match(/^```([a-zA-Z]+)?\s*([\s\S]*?)```$/);
-    if (fencedMatch) {
-      return {
-        lang: fencedMatch[1] || language,
-        cleanCode: fencedMatch[2].trim()
-      };
-    }
+export function FormattedCodeBlock({ code }: FormattedCodeBlockProps) {
+  // Log what we receive
+  console.log("FormattedCodeBlock received:", code);
+  
+  // Convert escaped newlines to actual newlines
+  const processedCode = code.replace(/\\n/g, '\n');
+  console.log("Processed code:", processedCode);
+  
+  // Check for code blocks (```language)
+  const codeBlockRegex = /^```(\w+)\n([\s\S]*?)\n```$/;
+  const codeBlockMatch = processedCode.match(codeBlockRegex);
+  
+  if (codeBlockMatch) {
+    const language = codeBlockMatch[1];
+    const codeContent = codeBlockMatch[2];
     
-    // Match inline code snippets wrapped in single backticks
-    const inlineMatch = codeString.match(/^`([^`]+)`$/);
-    if (inlineMatch && !inlineMatch[1].includes('\n')) {
-      return {
-        lang: 'text',
-        cleanCode: inlineMatch[1]
-      };
-    }
-    
-    // If no code block pattern found, return as plain text
-    return { lang: language, cleanCode: codeString };
-  };
-
-  const { lang, cleanCode } = extractLanguageAndCode(code);
-
-  // Handle fenced code blocks (```code```)
-  if (code.startsWith('```') && code.endsWith('```')) {
     return (
       <div className="my-2 rounded-lg overflow-hidden">
         <SyntaxHighlighter 
-          language={lang} 
+          language={language} 
           style={oneDark}
           customStyle={{
+            margin: 0,
             borderRadius: '0.5rem',
-            padding: '1rem',
             fontSize: '0.9rem',
-            margin: 0
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: '"Fira Code", monospace',
+              lineHeight: '1.5',
+            }
           }}
         >
-          {cleanCode}
+          {codeContent}
         </SyntaxHighlighter>
       </div>
     );
   }
-
-  // Handle inline code snippets (`code`)
-  if (code.startsWith('`') && code.endsWith('`') && !code.includes('\n')) {
+  
+  // Check for inline code (`code`)
+  const inlineCodeRegex = /^`(.*)`$/;
+  const inlineCodeMatch = processedCode.match(inlineCodeRegex);
+  
+  if (inlineCodeMatch) {
     return (
-      <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
-        {cleanCode}
+      <code className="px-1.5 py-0.5 bg-muted rounded-md font-mono text-sm">
+        {inlineCodeMatch[1]}
       </code>
     );
   }
-
-  // If it's not a code block, return as plain text
-  return <span>{code}</span>;
+  
+  // Plain text
+  return <span>{processedCode}</span>;
 }

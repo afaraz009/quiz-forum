@@ -27,6 +27,26 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
   const isShortAnswer = !question.options
   const isAnswered = selectedAnswer !== undefined && selectedAnswer !== ''
 
+  // Function to process text with code formatting
+  const processTextWithCode = (text: string) => {
+    // Split text by code blocks and inline code
+    const parts = text.split(/(```\w*\n[\s\S]*?\n```|`[^`]*`)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        // Code block
+        return <FormattedCodeBlock key={index} code={part} />;
+      } else if (part.startsWith('`') && part.endsWith('`')) {
+        // Inline code
+        return <FormattedCodeBlock key={index} code={part} />;
+      } else if (part) {
+        // Regular text
+        return part;
+      }
+      return null;
+    });
+  };
+
   // Determine card styling based on answer state
   let cardClassName = "rounded-lg p-4 bg-card transition-all duration-200"
 
@@ -39,20 +59,6 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
   } else {
     cardClassName += " border border-border"
   }
-
-  // Process question text to handle multiple code blocks
-  const processQuestionText = (text: string) => {
-    // Split text by code blocks and process each part
-    const parts = text.split(/(```[\s\S]*?```|`[^`]+`)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('```') && part.endsWith('```')) {
-        return <FormattedCodeBlock key={index} code={part} />;
-      } else if (part.startsWith('`') && part.endsWith('`') && !part.includes('\n')) {
-        return <FormattedCodeBlock key={index} code={part} />;
-      }
-      return part;
-    });
-  };
 
   return (
     <div className={`${cardClassName} quiz-content`}
@@ -68,11 +74,8 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-medium text-card-foreground select-none">
-            Question {index + 1}: 
+            Question {index + 1}: {processTextWithCode(question.question)}
           </h3>
-          <div className="flex-grow">
-            {processQuestionText(question.question)}
-          </div>
           {!submitted && (
             <div className="flex items-center gap-1">
               {isAnswered ? (
@@ -107,11 +110,11 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
           {submitted && (
             <div className="text-sm space-y-1">
               <div className="text-muted-foreground select-none">
-                Correct answer: <span className="font-medium text-green-600 dark:text-green-400"><FormattedCodeBlock code={question.correctAnswer} /></span>
+                Correct answer: <span className="font-medium text-green-600 dark:text-green-400">{processTextWithCode(question.correctAnswer)}</span>
               </div>
               {!isCorrect && selectedAnswer && (
                 <div className="text-muted-foreground select-none">
-                  Your answer: <span className="font-medium text-red-600 dark:text-red-400"><FormattedCodeBlock code={selectedAnswer} /></span>
+                  Your answer: <span className="font-medium text-red-600 dark:text-red-400">{processTextWithCode(selectedAnswer)}</span>
                 </div>
               )}
             </div>
@@ -141,20 +144,6 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
               optionClassName += " border-border hover:bg-muted/50 hover:border-muted-foreground/30"
             }
 
-            // Process option text to handle code blocks
-            const processOptionText = (text: string) => {
-              // Split text by code blocks and process each part
-              const parts = text.split(/(```[\s\S]*?```|`[^`]+`)/g);
-              return parts.map((part, index) => {
-                if (part.startsWith('```') && part.endsWith('```')) {
-                  return <FormattedCodeBlock key={index} code={part} />;
-                } else if (part.startsWith('`') && part.endsWith('`') && !part.includes('\n')) {
-                  return <FormattedCodeBlock key={index} code={part} />;
-                }
-                return part;
-              });
-            };
-
             return (
               <Label key={optionIndex} htmlFor={`q${index}-option${optionIndex}`} className={optionClassName}>
                 <div className="flex items-center space-x-3 w-full">
@@ -165,7 +154,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
                     className={`${isSelected && !submitted ? 'border-primary text-primary' : ''}`}
                   />
                   <span className="flex-grow text-card-foreground font-medium select-none">
-                    {processOptionText(option)}
+                    {processTextWithCode(option)}
                   </span>
                   <div className="flex-shrink-0">
                     {submitted && isCorrectAnswer && <CheckCircle className="h-5 w-5 text-green-500" />}
