@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Fira Code font for better code rendering */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -305,5 +308,10 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+  }
+
+  /* Code block styling */
+  code {
+    font-family: 'Fira Code', monospace;
   }
 }

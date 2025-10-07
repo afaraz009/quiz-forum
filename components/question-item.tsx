@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { CheckCircle, XCircle } from "lucide-react"
+import { FormattedCodeBlock } from "@/components/formatted-code-block"
 
 interface QuestionItemProps {
   question: QuizQuestion
@@ -25,6 +26,26 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
 
   const isShortAnswer = !question.options
   const isAnswered = selectedAnswer !== undefined && selectedAnswer !== ''
+
+  // Function to process text with code formatting
+  const processTextWithCode = (text: string) => {
+    // Split text by code blocks and inline code
+    const parts = text.split(/(```\w*\n[\s\S]*?\n```|`[^`]*`)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        // Code block
+        return <FormattedCodeBlock key={index} code={part} />;
+      } else if (part.startsWith('`') && part.endsWith('`')) {
+        // Inline code
+        return <FormattedCodeBlock key={index} code={part} />;
+      } else if (part) {
+        // Regular text
+        return part;
+      }
+      return null;
+    });
+  };
 
   // Determine card styling based on answer state
   let cardClassName = "rounded-lg p-4 bg-card transition-all duration-200"
@@ -53,7 +74,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-medium text-card-foreground select-none">
-            Question {index + 1}: {question.question}
+            Question {index + 1}: {processTextWithCode(question.question)}
           </h3>
           {!submitted && (
             <div className="flex items-center gap-1">
@@ -89,11 +110,11 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
           {submitted && (
             <div className="text-sm space-y-1">
               <div className="text-muted-foreground select-none">
-                Correct answer: <span className="font-medium text-green-600 dark:text-green-400">{question.correctAnswer}</span>
+                Correct answer: <span className="font-medium text-green-600 dark:text-green-400">{processTextWithCode(question.correctAnswer)}</span>
               </div>
               {!isCorrect && selectedAnswer && (
                 <div className="text-muted-foreground select-none">
-                  Your answer: <span className="font-medium text-red-600 dark:text-red-400">{selectedAnswer}</span>
+                  Your answer: <span className="font-medium text-red-600 dark:text-red-400">{processTextWithCode(selectedAnswer)}</span>
                 </div>
               )}
             </div>
@@ -133,7 +154,7 @@ export function QuestionItem({ question, index, selectedAnswer, onSelectAnswer, 
                     className={`${isSelected && !submitted ? 'border-primary text-primary' : ''}`}
                   />
                   <span className="flex-grow text-card-foreground font-medium select-none">
-                    {option}
+                    {processTextWithCode(option)}
                   </span>
                   <div className="flex-shrink-0">
                     {submitted && isCorrectAnswer && <CheckCircle className="h-5 w-5 text-green-500" />}
