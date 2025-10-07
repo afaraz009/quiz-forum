@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What is the output of the following JavaScript code?\n```js\nconsole.log(2 + '2');\n```",
+    "options": [
+      "`4`",
+      "`22`",
+      "`NaN`",
+      "`undefined`"
+    ],
+    "correctAnswer": "`22`"
+  },
+  {
+    "question": "Which CSS property is used to make an element a flex container?\n```css\n.container {\n  display: ____;\n}\n```",
+    "options": [
+      "`block`",
+      "`inline`",
+      "`flex`",
+      "`grid`"
+    ],
+    "correctAnswer": "`flex`"
+  },
+  {
+    "question": "What is the correct way to declare a variable in Python?",
+    "options": [
+      "`var x = 5`",
+      "`let x = 5`",
+      "`x = 5`",
+      "`int x = 5`"
+    ],
+    "correctAnswer": "`x = 5`"
+  }
+]

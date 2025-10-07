@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What is the output of this JavaScript code?\n```js\nlet x = 5;\nconsole.log(x++ + ++x);\n```",
+    "options": [
+      "`10`",
+      "`11`",
+      "`12`",
+      "`13`"
+    ],
+    "correctAnswer": "`12`"
+  },
+  {
+    "question": "Which of the following CSS selectors targets all paragraph elements with the class 'highlight'?",
+    "options": [
+      "`p > .highlight`",
+      "`p.highlight`",
+      "`.highlight p`",
+      "`p + .highlight`"
+    ],
+    "correctAnswer": "`p.highlight`"
+  },
+  {
+    "question": "What is the correct syntax for a Python function definition?\n```python\ndef my_function():\n    pass\n```",
+    "options": [
+      "`function myFunction() {}`",
+      "`def my_function():`",
+      "`func myFunction() {}`",
+      "`function my_function() {}`"
+    ],
+    "correctAnswer": "`def my_function():`"
+  }
+]
