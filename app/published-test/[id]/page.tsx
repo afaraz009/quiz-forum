@@ -38,6 +38,8 @@ export default function PublishedTestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showStickyHeader, setShowStickyHeader] = useState(false)
   const [currentAnswers, setCurrentAnswers] = useState<Record<number, string>>({})
+  const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const hasSubmittedRef = useRef(false)
   const currentAnswersRef = useRef<Record<number, string>>({})
   const quizRef = useRef<HTMLDivElement>(null)
@@ -247,6 +249,36 @@ export default function PublishedTestPage() {
     )
   }
 
+  const handleSaveForPractice = async () => {
+    if (!testData || isSaving) return
+    
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/published-tests/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          testId: testData.id
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setIsSaved(true)
+        alert('Test saved for practice successfully!')
+      } else {
+        const errorData = await response.json()
+        alert('Error saving test: ' + errorData.error)
+      }
+    } catch (error) {
+      console.error('Error saving test:', error)
+      alert('Error saving test. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   // Pre-test screen
   if (!hasStarted) {
@@ -295,7 +327,6 @@ export default function PublishedTestPage() {
                 </ul>
               </div>
 
-
               <div className="flex gap-4 pt-4">
                 <Button
                   onClick={handleStartTest}
@@ -310,6 +341,14 @@ export default function PublishedTestPage() {
                   size="lg"
                 >
                   Back to Dashboard
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleSaveForPractice}
+                  disabled={isSaving || isSaved}
+                  size="lg"
+                >
+                  {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save for Practice"}
                 </Button>
               </div>
             </CardContent>
@@ -354,22 +393,32 @@ export default function PublishedTestPage() {
                     </span>
                   </div>
                 )}
-                <Button 
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700"
-                  onClick={() => {
-                    // Scroll to the submit button in the quiz component
-                    const quizElement = quizRef.current;
-                    if (quizElement) {
-                      const submitSection = quizElement.querySelector('.border-t');
-                      if (submitSection) {
-                        submitSection.scrollIntoView({ behavior: 'smooth' });
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSaveForPractice}
+                    disabled={isSaving || isSaved}
+                  >
+                    {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
+                  </Button>
+                  <Button 
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-700"
+                    onClick={() => {
+                      // Scroll to the submit button in the quiz component
+                      const quizElement = quizRef.current;
+                      if (quizElement) {
+                        const submitSection = quizElement.querySelector('.border-t');
+                        if (submitSection) {
+                          submitSection.scrollIntoView({ behavior: 'smooth' });
+                        }
                       }
-                    }
-                  }}
-                >
-                  Submit Test
-                </Button>
+                    }}
+                  >
+                    Submit Test
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -394,23 +443,33 @@ export default function PublishedTestPage() {
                     </span>
                   </div>
                 )}
-                {!showStickyHeader && (
+                <div className="flex items-center gap-2">
                   <Button 
-                    className="bg-orange-600 hover:bg-orange-700"
-                    onClick={() => {
-                      // Scroll to the submit button in the quiz component
-                      const quizElement = quizRef.current;
-                      if (quizElement) {
-                        const submitSection = quizElement.querySelector('.border-t');
-                        if (submitSection) {
-                          submitSection.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }
-                    }}
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveForPractice}
+                    disabled={isSaving || isSaved}
                   >
-                    Submit Test
+                    {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save for Practice"}
                   </Button>
-                )}
+                  {!showStickyHeader && (
+                    <Button 
+                      className="bg-orange-600 hover:bg-orange-700"
+                      onClick={() => {
+                        // Scroll to the submit button in the quiz component
+                        const quizElement = quizRef.current;
+                        if (quizElement) {
+                          const submitSection = quizElement.querySelector('.border-t');
+                          if (submitSection) {
+                            submitSection.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }
+                      }}
+                    >
+                      Submit Test
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
