@@ -202,7 +202,7 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                   onClick={() => handleSaveForPractice(test.id)}
                   disabled={test.isSaved || savingStates[test.id]}
                 >
-                  {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save for Practice"}
+                  {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save"}
                 </Button>
               </div>
             </TableCell>

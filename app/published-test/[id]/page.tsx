@@ -348,7 +348,7 @@ export default function PublishedTestPage() {
                   disabled={isSaving || isSaved}
                   size="lg"
                 >
-                  {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save for Practice"}
+                  {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save"}
                 </Button>
               </div>
             </CardContent>
@@ -450,7 +450,7 @@ export default function PublishedTestPage() {
                     onClick={handleSaveForPractice}
                     disabled={isSaving || isSaved}
                   >
-                    {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save for Practice"}
+                    {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
                   </Button>
                   {!showStickyHeader && (
                     <Button 
