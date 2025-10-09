@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
 
 interface PublishedTest {
   id: string
@@ -34,6 +35,7 @@ interface PublishedTest {
     createdAt: string
   } | null
   canTakeTest: boolean
+  isSaved: boolean
 }
 
 interface PublishedTestsTableProps {
@@ -42,9 +44,41 @@ interface PublishedTestsTableProps {
 
 export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
   const router = useRouter()
+  const [savingStates, setSavingStates] = useState<Record<string, boolean>>({})
 
   const handleTakePublishedTest = (testId: string) => {
     router.push(`/published-test/${testId}`)
+  }
+
+  const handleSaveForPractice = async (testId: string) => {
+    // Set saving state for this test
+    setSavingStates(prev => ({ ...prev, [testId]: true }))
+    
+    try {
+      const response = await fetch('/api/published-tests/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          testId
+        })
+      })
+
+      if (response.ok) {
+        // Refresh the page to update the saved status
+        window.location.reload()
+      } else {
+        const errorData = await response.json()
+        alert('Error saving test: ' + errorData.error)
+      }
+    } catch (error) {
+      console.error('Error saving test:', error)
+      alert('Error saving test. Please try again.')
+    } finally {
+      // Reset saving state
+      setSavingStates(prev => ({ ...prev, [testId]: false }))
+    }
   }
 
   const calculatePercentage = (score: number, totalQuestions: number) => {
@@ -141,11 +175,11 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                   )
                 })()
               ) : (
-                <Badge variant="outline">Not Attempted</Badge>
+                <Badge variant="outline">N/A</Badge>
               )}
             </TableCell>
             <TableCell>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {test.canTakeTest ? (
                   <Button
                     size="sm"
@@ -155,19 +189,21 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                     Take Test
                   </Button>
                 ) : (
-                  <Button variant="outline" size="sm" disabled>
-                    Already Attempted
-                  </Button>
-                )}
-                {test.hasAttempted && (
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={() => router.push(`/published-test/${test.id}/results`)}
                   >
                     View Results
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSaveForPractice(test.id)}
+                  disabled={test.isSaved || savingStates[test.id]}
+                >
+                  {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save for Practice"}
+                </Button>
               </div>
             </TableCell>
           </TableRow>

@@ -46,6 +46,7 @@ interface PublishedTest {
     createdAt: string
   } | null
   canTakeTest: boolean
+  isSaved: boolean
 }
 
 export default function DashboardPage() {

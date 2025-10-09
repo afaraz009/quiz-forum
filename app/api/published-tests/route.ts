@@ -53,7 +53,29 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Format the response to include attempt status
+    // Fetch user's saved quizzes to check which published tests have been saved
+    const userQuizzes = await prisma.quiz.findMany({
+      where: {
+        userId: user.id
+      },
+      select: {
+        description: true
+      }
+    })
+
+    // Create a set of saved published test IDs for quick lookup
+    const savedTestIds = new Set<string>()
+    userQuizzes.forEach(quiz => {
+      if (quiz.description && quiz.description.includes('Saved from published test')) {
+        // Extract the published test ID from the description
+        const match = quiz.description.match(/\(Saved from published test - ([^\)]+)\)/)
+        if (match && match[1]) {
+          savedTestIds.add(match[1])
+        }
+      }
+    })
+
+    // Format the response to include attempt status and save status
     const formattedTests = publishedTests.map(test => ({
       id: test.id,
       title: test.title,
@@ -67,7 +89,9 @@ export async function GET(request: NextRequest) {
       hasAttempted: test.testAttempts.length > 0,
       attempt: test.testAttempts[0] || null, // There should only be one attempt per user per test
       // Status indicators
-      canTakeTest: test.testAttempts.length === 0 // Can only take if no attempts
+      canTakeTest: test.testAttempts.length === 0, // Can only take if no attempts
+      // Save status
+      isSaved: savedTestIds.has(test.id)
     }))
 
     return NextResponse.json({ publishedTests: formattedTests })
