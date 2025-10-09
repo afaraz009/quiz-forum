@@ -8,6 +8,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, XCircle, Clock, User, BarChart3 } from "lucide-react"
 import { QuizQuestion } from "@/types/quiz"
+import { FormattedCodeBlock } from "@/components/formatted-code-block"
+
+// Function to process text with code formatting
+const processTextWithCode = (text: string) => {
+  // Split text by code blocks and inline code
+  const parts = text.split(/(```\w*\n[\s\S]*?\n```|`[^`]*`)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('```') && part.endsWith('```')) {
+      // Code block
+      return <FormattedCodeBlock key={index} code={part} />;
+    } else if (part.startsWith('`') && part.endsWith('`')) {
+      // Inline code
+      return <FormattedCodeBlock key={index} code={part} />;
+    } else if (part) {
+      // Regular text
+      return part;
+    }
+    return null;
+  });
+};
 
 interface TestResultData {
   id: string
@@ -203,7 +224,7 @@ export default function TestResultsPage() {
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2 text-gray-900">Question {index + 1}</h3>
-                    <p className="text-gray-800 mb-3">{question.question}</p>
+                    <p className="text-gray-800 mb-3">{processTextWithCode(question.question)}</p>
 
                     {/* Multiple choice options */}
                     {question.options && (
@@ -221,7 +242,7 @@ export default function TestResultsPage() {
                               <div className="flex items-center gap-2">
                                 {isCorrectAnswer && <CheckCircle className="h-4 w-4 text-green-600" />}
                                 {isUserChoice && !isCorrectAnswer && <XCircle className="h-4 w-4 text-red-600" />}
-                                <span className={`${isCorrectAnswer ? 'font-medium text-green-800' : 'text-gray-800'}`}>{option}</span>
+                                <span className={`${isCorrectAnswer ? 'font-medium text-green-800' : 'text-gray-800'}`}>{processTextWithCode(option)}</span>
                               </div>
                             </div>
                           )
@@ -237,13 +258,13 @@ export default function TestResultsPage() {
                           isUnanswered ? 'text-yellow-700 italic' :
                           isCorrect ? 'text-green-700' : 'text-red-700'
                         }>
-                          {isUnanswered ? 'No answer provided' : userAnswer}
+                          {isUnanswered ? 'No answer provided' : processTextWithCode(userAnswer)}
                         </span>
                       </div>
                       {!isCorrect && (
                         <div className="flex gap-2">
                           <span className="font-medium text-gray-900">Correct answer:</span>
-                          <span className="text-green-700">{question.correctAnswer}</span>
+                          <span className="text-green-700">{processTextWithCode(question.correctAnswer)}</span>
                         </div>
                       )}
                     </div>

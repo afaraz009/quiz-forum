@@ -1,32 +1,50 @@
-[
-  {
-    "question": "What is the output of this JavaScript code?\n```js\nconsole.log(2 + '2');\n```",
-    "options": [
-      "4",
-      "22",
-      "NaN",
-      "undefined"
-    ],
-    "correctAnswer": "22"
-  },
-  {
-    "question": "Which of the following is the correct way to declare a variable in Python?",
-    "options": [
-      "`var x = 5`",
-      "`let x = 5`",
-      "`x = 5`",
-      "`int x = 5`"
-    ],
-    "correctAnswer": "`x = 5`"
-  },
-  {
-    "question": "What does the following CSS do?\n```css\n.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n```",
-    "options": [
-      "Makes the container invisible",
-      "Centers content both horizontally and vertically",
-      "Changes the container color to blue",
-      "Adds a border to the container"
-    ],
-    "correctAnswer": "Centers content both horizontally and vertically"
-  }
-]
+{
+  "title": "Programming Fundamentals Quiz",
+  "description": "Test your knowledge of programming concepts with code examples",
+  "questions": [
+    {
+      "question": "What is the output of the following JavaScript code?\n```js\nconsole.log(2 + '2');\n```",
+      "options": [
+        "`\"4\"`",
+        "`\"22\"`",
+        "`4`",
+        "`22`"
+      ],
+      "correctAnswer": "`\"22\"`",
+      "explanation": "In JavaScript, when you add a number and a string, the number is converted to a string and concatenation occurs."
+    },
+    {
+      "question": "Which CSS property is used to change the text color of an element?",
+      "options": [
+        "`font-color`",
+        "`text-color`",
+        "`color`",
+        "`background-color`"
+      ],
+      "correctAnswer": "`color`",
+      "explanation": "The `color` property in CSS is used to set the color of text content."
+    },
+    {
+      "question": "What is the correct way to declare a variable in Python?",
+      "options": [
+        "`var x = 5`",
+        "`let x = 5`",
+        "`x = 5`",
+        "`int x = 5`"
+      ],
+      "correctAnswer": "`x = 5`",
+      "explanation": "Python uses dynamic typing, so you simply assign a value to a variable name without declaring its type."
+    },
+    {
+      "question": "What does the following HTML element do?\n```html\n<input type=\"email\" required>\n```",
+      "options": [
+        "Creates a text input that validates email format",
+        "Creates a button that sends emails",
+        "Creates a text area for email content",
+        "Creates a dropdown with email options"
+      ],
+      "correctAnswer": "Creates a text input that validates email format",
+      "explanation": "The `type=\"email\"` attribute creates an input field that automatically validates that the entered text is a properly formatted email address."
+    }
+  ]
+}

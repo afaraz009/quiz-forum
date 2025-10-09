@@ -12,6 +12,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Download, Search, Users, BarChart3, Eye, CheckCircle, XCircle, Calendar, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { QuizQuestion } from "@/types/quiz"
+import { FormattedCodeBlock } from "@/components/formatted-code-block"
+
+// Function to process text with code formatting
+const processTextWithCode = (text: string) => {
+  // Split text by code blocks and inline code
+  const parts = text.split(/(```\w*\n[\s\S]*?\n```|`[^`]*`)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('```') && part.endsWith('```')) {
+      // Code block
+      return <FormattedCodeBlock key={index} code={part} />;
+    } else if (part.startsWith('`') && part.endsWith('`')) {
+      // Inline code
+      return <FormattedCodeBlock key={index} code={part} />;
+    } else if (part) {
+      // Regular text
+      return part;
+    }
+    return null;
+  });
+};
 
 interface TestDetails {
   id: string
@@ -452,7 +473,7 @@ export default function TestResultsDetail() {
                           <XCircle className="h-5 w-5 text-red-500" />
                         )}
                       </div>
-                      <p className="text-sm mb-3">{question.question}</p>
+                      <p className="text-sm mb-3">{processTextWithCode(question.question)}</p>
 
                       {question.options && (
                         <div className="mb-3">
@@ -466,7 +487,7 @@ export default function TestResultsDetail() {
                               }`}>
                                 {option === question.correctAnswer && '✓ '}
                                 {option === userAnswer && option !== question.correctAnswer && '✗ '}
-                                {option}
+                                {processTextWithCode(option)}
                               </div>
                             ))}
                           </div>
@@ -477,13 +498,13 @@ export default function TestResultsDetail() {
                         <div>
                           <p className="font-medium text-gray-600">Student Answer:</p>
                           <p className={`p-2 rounded ${isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                            {userAnswer}
+                            {processTextWithCode(userAnswer)}
                           </p>
                         </div>
                         <div>
                           <p className="font-medium text-gray-600">Correct Answer:</p>
                           <p className="p-2 rounded bg-green-50 text-green-700">
-                            {question.correctAnswer}
+                            {processTextWithCode(question.correctAnswer)}
                           </p>
                         </div>
                       </div>
