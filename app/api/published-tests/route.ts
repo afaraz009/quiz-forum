@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Create a set of saved published test IDs for quick lookup
     const savedTestIds = new Set<string>()
     userQuizzes.forEach(quiz => {
-      if (quiz.description && quiz.description.includes('Saved from published test')) {
+      if (quiz.description && quiz.description.includes('(Saved from published test - ')) {
         // Extract the published test ID from the description
         const match = quiz.description.match(/\(Saved from published test - ([^\)]+)\)/)
         if (match && match[1]) {

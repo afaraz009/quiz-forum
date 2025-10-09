@@ -36,6 +36,14 @@ export function PracticeQuizzesTable({ quizzes }: PracticeQuizzesTableProps) {
     router.push(`/quiz/${quizId}`)
   }
 
+  // Function to clean up the description display
+  const cleanDescription = (description: string | null) => {
+    if (!description) return null
+    
+    // Remove the "Saved from published test" part from the description
+    return description.replace(/\s*\(Saved from published test.*\)/, '').trim() || null
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -54,7 +62,7 @@ export function PracticeQuizzesTable({ quizzes }: PracticeQuizzesTableProps) {
           <TableRow key={quiz.id}>
             <TableCell>
               <div className="font-medium">{quiz.title}</div>
-              <div className="text-sm text-muted-foreground">{quiz.description}</div>
+              <div className="text-sm text-muted-foreground">{cleanDescription(quiz.description)}</div>
             </TableCell>
             <TableCell>{quiz.totalQuestions}</TableCell>
             <TableCell>{`${quiz.highestScore}/${quiz.totalQuestions}`}</TableCell>

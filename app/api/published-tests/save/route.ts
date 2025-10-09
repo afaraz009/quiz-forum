@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user has already saved this test
+    // Check if user has already saved this test by checking title and description pattern
     const existingQuiz = await prisma.quiz.findFirst({
       where: {
         userId: session.user.id,
         title: publishedTest.title,
         description: {
-          contains: `Saved from published test`
+          contains: `(Saved from published test)`
         }
       }
     })
@@ -59,10 +59,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create a new quiz from the published test
+    // Store the original test ID in the description for detection purposes
     const newQuiz = await prisma.quiz.create({
       data: {
         title: publishedTest.title,
-        description: `${publishedTest.description ? publishedTest.description + " " : ""}(Saved from published test - ${publishedTest.id})`,
+        description: `${publishedTest.description ? publishedTest.description + " " : ""}(Saved from published test - ${testId})`,
         questions: publishedTest.questions,
         totalQuestions: publishedTest.totalQuestions,
         userId: session.user.id,
