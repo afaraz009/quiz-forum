@@ -11,6 +11,8 @@ import { Search } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PublishedTestsTable } from "@/components/published-tests-table"
 import { PracticeQuizzesTable } from "@/components/practice-quizzes-table"
+import { FolderManager } from "@/components/folder-manager"
+import { toast } from "sonner"
 
 interface QuizHistory {
   id: string
@@ -23,6 +25,12 @@ interface QuizHistory {
   highestScore: number
   latestScore: number | null
   lastAttemptDate: string | null
+  folderId: string | null
+  folder: {
+    id: string
+    name: string
+    isDefault: boolean
+  } | null
 }
 
 interface PublishedTest {
@@ -49,13 +57,21 @@ interface PublishedTest {
   isSaved: boolean
 }
 
+interface Folder {
+  id: string
+  name: string
+  isDefault: boolean
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [quizHistory, setQuizHistory] = useState<QuizHistory[]>([])
+  const [folders, setFolders] = useState<Folder[]>([])
   const [filteredQuizzes, setFilteredQuizzes] = useState<QuizHistory[]>([])
   const [publishedTests, setPublishedTests] = useState<PublishedTest[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -66,16 +82,31 @@ export default function DashboardPage() {
   }, [session])
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
+    if (searchQuery.trim() === "" && selectedFolder === null) {
       setFilteredQuizzes(quizHistory)
     } else {
-      const filtered = quizHistory.filter(quiz =>
-        quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (quiz.description && quiz.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+      let filtered = quizHistory
+      
+      // Filter by search query
+      if (searchQuery.trim() !== "") {
+        filtered = filtered.filter(quiz =>
+          quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (quiz.description && quiz.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+      }
+      
+      // Filter by folder
+      if (selectedFolder !== null) {
+        if (selectedFolder === "uncategorized") {
+          filtered = filtered.filter(quiz => !quiz.folderId)
+        } else {
+          filtered = filtered.filter(quiz => quiz.folderId === selectedFolder)
+        }
+      }
+      
       setFilteredQuizzes(filtered)
     }
-  }, [searchQuery, quizHistory])
+  }, [searchQuery, quizHistory, selectedFolder])
 
   const fetchQuizHistory = async () => {
     try {
@@ -84,6 +115,7 @@ export default function DashboardPage() {
         const data = await response.json()
         setQuizHistory(data.quizzes)
         setFilteredQuizzes(data.quizzes)
+        setFolders(data.folders)
       }
     } catch (error) {
       console.error("Error fetching quiz history:", error)
@@ -119,6 +151,33 @@ export default function DashboardPage() {
 
   const handleTakePublishedTest = (testId: string) => {
     router.push(`/published-test/${testId}`)
+  }
+
+  const handleDeleteFolder = async (folderId: string, folderName: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "DELETE",
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`Folder "${folderName}" deleted successfully!`)
+        setFolders(folders.filter(folder => folder.id !== folderId))
+        
+        // If the deleted folder was selected, reset to all quizzes
+        if (selectedFolder === folderId) {
+          setSelectedFolder(null)
+        }
+        
+        // Refresh quiz list to move quizzes to uncategorized
+        fetchQuizHistory()
+      } else {
+        toast.error(data.error || "Failed to delete folder")
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the folder")
+    }
   }
 
   if (status === "loading" || isLoading) {
@@ -248,8 +307,51 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {quizHistory.length > 0 && (
-                <div className="relative">
+              {/* Folder and Search Controls */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Folder Filter */}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={selectedFolder === null ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedFolder(null)}
+                  >
+                    All Quizzes
+                  </Button>
+                  <Button
+                    variant={selectedFolder === "uncategorized" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedFolder("uncategorized")}
+                  >
+                    Uncategorized
+                  </Button>
+                  {folders.filter(f => !f.isDefault).map(folder => (
+                    <Button
+                      key={folder.id}
+                      variant={selectedFolder === folder.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedFolder(folder.id)}
+                      className="flex items-center gap-1"
+                    >
+                      {folder.name}
+                      {!folder.isDefault && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteFolder(folder.id, folder.name)
+                          }}
+                          className="ml-1 text-xs hover:bg-destructive/20 rounded-full p-1"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </Button>
+                  ))}
+                  <FolderManager folders={folders} onFoldersChange={setFolders} />
+                </div>
+                
+                {/* Search */}
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     placeholder="Search your quizzes..."
@@ -258,7 +360,8 @@ export default function DashboardPage() {
                     className="pl-10 rounded-xl border-border/50 focus:border-primary/50"
                   />
                 </div>
-              )}
+              </div>
+              
               {quizHistory.length === 0 ? (
                 <div className="text-center py-12 space-y-4">
                   <div className="w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mx-auto">

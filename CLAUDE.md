@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Next.js quiz application with user authentication that allows users to create, save, and take interactive quizzes. Users can upload JSON files or paste JSON content to create quizzes with both multiple-choice questions (MCQs) with exactly 4 options and short-answer text questions. The app includes user registration/login, quiz persistence, and attempt tracking.
+This is a Next.js quiz application with user authentication that allows users to create, save, and take interactive quizzes. Users can upload JSON files or paste JSON content to create quizzes with both multiple-choice questions (MCQs) with exactly 4 options and short-answer text questions. The app includes user registration/login, quiz persistence, and attempt tracking. Students can now organize their quizzes using folders.
 
 ## Development Commands
 
@@ -21,13 +21,13 @@ This is a Next.js quiz application with user authentication that allows users to
 ### Core Components Structure
 
 - **app/page.tsx**: Main page component managing file upload and quiz state
-- **app/dashboard/page.tsx**: User dashboard showing saved quizzes and attempt history
+- **app/dashboard/page.tsx**: User dashboard showing saved quizzes and attempt history with folder organization
 - **app/quiz/[id]/page.tsx**: Individual quiz taking page with dynamic routing
 - **app/login/page.tsx** & **app/signup/page.tsx**: Authentication pages
 - **components/file-uploader.tsx**: Handles JSON file upload and text input with validation
 - **components/quiz.tsx**: Main quiz component managing question display, answers, and scoring
 - **components/question-item.tsx**: Individual question rendering for both MCQ and text questions
-- **components/quiz-save-dialog.tsx**: Dialog for saving quizzes to database
+- **components/quiz-save-dialog.tsx**: Dialog for saving quizzes to database with folder selection
 - **components/auth/**: Authentication-related components
 - **types/quiz.ts**: Core QuizQuestion interface definition
 - **lib/auth.ts**: NextAuth configuration with credentials provider
@@ -39,8 +39,9 @@ This is a Next.js quiz application with user authentication that allows users to
 3. **Validation**: JSON is validated against QuizQuestion schema using Zod
 4. **Quiz Taking**: Validated questions are passed to Quiz component
 5. **Answer Management**: Quiz component manages user answers and scoring
-6. **Persistence**: Quizzes can be saved to database with user association
+6. **Persistence**: Quizzes can be saved to database with user association and folder organization
 7. **Results & History**: Results are displayed with quiz attempts tracked in database
+8. **Folder Organization**: Users can create folders and organize quizzes for better management
 
 ## Technology Stack
 
@@ -66,7 +67,6 @@ Questions must follow this structure:
     "correctAnswer": "Correct answer"
   }
 ]
-```
 
 - MCQ questions require exactly 4 options
 - Text questions omit the options field
@@ -76,7 +76,8 @@ Questions must follow this structure:
 
 The app uses Prisma with SQLite and includes these key models:
 - **User**: Authentication and user management
-- **Quiz**: Saved quizzes with JSON question data
+- **Folder**: User-created folders for organizing quizzes
+- **Quiz**: Saved quizzes with JSON question data and folder association
 - **QuizAttempt**: User quiz attempts with scores and answers
 - **Account/Session**: NextAuth session management
 
@@ -84,10 +85,15 @@ The app uses Prisma with SQLite and includes these key models:
 
 - **POST /api/register**: User registration
 - **GET/POST /api/auth/[...nextauth]**: NextAuth authentication
-- **POST /api/quiz/save**: Save quiz to database
+- **POST /api/quiz/save**: Save quiz to database with folder selection
 - **POST /api/quiz/submit**: Submit quiz attempt
-- **GET /api/quiz/history**: Get user's quiz history
+- **GET /api/quiz/history**: Get user's quiz history with folder information
 - **GET /api/quiz/[id]**: Get specific quiz data
+- **GET /api/folders**: Get user's folders
+- **POST /api/folders**: Create new folder
+- **DELETE /api/folders/[id]**: Delete folder
+- **POST /api/folders/move-quiz**: Move quiz between folders
+- **POST /api/published-tests/save**: Save published test with folder selection
 
 ## Deployment
 

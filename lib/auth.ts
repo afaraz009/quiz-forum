@@ -73,6 +73,28 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.sub = user.id
         token.isAdmin = (user as any).isAdmin
+        
+        // Create default folder for new users
+        try {
+          const existingDefaultFolder = await prisma.folder.findFirst({
+            where: {
+              userId: user.id,
+              isDefault: true
+            }
+          })
+          
+          if (!existingDefaultFolder) {
+            await prisma.folder.create({
+              data: {
+                name: "Uncategorized",
+                isDefault: true,
+                userId: user.id
+              }
+            })
+          }
+        } catch (error) {
+          console.error("Error creating default folder for user:", error)
+        }
       }
       return token
     },
