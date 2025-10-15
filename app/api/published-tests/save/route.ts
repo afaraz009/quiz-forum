@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { testId } = await request.json()
+    const { testId, folderId } = await request.json()
 
     if (!testId) {
       return NextResponse.json(
@@ -58,6 +58,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // If folderId is provided, validate it
+    let validatedFolderId = null
+    if (folderId) {
+      // @ts-ignore - Prisma client generation issue workaround
+      const folder = await prisma.folder.findUnique({
+        where: {
+          id: folderId,
+          userId: session.user.id
+        }
+      })
+
+      if (!folder) {
+        return NextResponse.json(
+          { error: "Folder not found or does not belong to you" },
+          { status: 404 }
+        )
+      }
+      validatedFolderId = folderId
+    }
+
     // Create a new quiz from the published test
     // Store the original test ID in the description for detection purposes
     const newQuiz = await prisma.quiz.create({
@@ -67,6 +87,8 @@ export async function POST(request: NextRequest) {
         questions: publishedTest.questions,
         totalQuestions: publishedTest.totalQuestions,
         userId: session.user.id,
+        // @ts-ignore - Prisma client generation issue workaround
+        folderId: validatedFolderId
       }
     })
 

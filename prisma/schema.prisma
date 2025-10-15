@@ -52,6 +52,7 @@ model User {
   quizAttempts    QuizAttempt[]
   publishedTests  PublishedTest[]
   testAttempts    TestAttempt[]
+  folders         Folder[]        // Added folders relationship
   createdAt       DateTime        @default(now())
 }
 
@@ -63,6 +64,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  isDefault Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizzes   Quiz[]   // Relationship to quizzes in this folder
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model Quiz {
   id           String        @id @default(cuid())
   title        String
@@ -71,11 +85,14 @@ model Quiz {
   totalQuestions Int
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId     String?       // Added folder relationship
+  folder       Folder?       @relation(fields: [folderId], references: [id], onDelete: SetNull)
   attempts     QuizAttempt[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   @@index([userId])
+  @@index([folderId])       // Added index for folder queries
 }
 
 model QuizAttempt {

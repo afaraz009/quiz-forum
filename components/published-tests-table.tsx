@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
+import { PublishedTestSaveDialog } from "@/components/published-test-save-dialog"
 
 interface PublishedTest {
   id: string
@@ -45,40 +46,23 @@ interface PublishedTestsTableProps {
 export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
   const router = useRouter()
   const [savingStates, setSavingStates] = useState<Record<string, boolean>>({})
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null)
+  const [selectedTestTitle, setSelectedTestTitle] = useState<string>("")
 
   const handleTakePublishedTest = (testId: string) => {
     router.push(`/published-test/${testId}`)
   }
 
-  const handleSaveForPractice = async (testId: string) => {
-    // Set saving state for this test
-    setSavingStates(prev => ({ ...prev, [testId]: true }))
-    
-    try {
-      const response = await fetch('/api/published-tests/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          testId
-        })
-      })
+  const handleSaveForPracticeClick = (testId: string, testTitle: string) => {
+    setSelectedTestId(testId)
+    setSelectedTestTitle(testTitle)
+    setSaveDialogOpen(true)
+  }
 
-      if (response.ok) {
-        // Refresh the page to update the saved status
-        window.location.reload()
-      } else {
-        const errorData = await response.json()
-        alert('Error saving test: ' + errorData.error)
-      }
-    } catch (error) {
-      console.error('Error saving test:', error)
-      alert('Error saving test. Please try again.')
-    } finally {
-      // Reset saving state
-      setSavingStates(prev => ({ ...prev, [testId]: false }))
-    }
+  const handleSaveSuccess = () => {
+    // Refresh the page to update the saved status
+    window.location.reload()
   }
 
   const calculatePercentage = (score: number, totalQuestions: number) => {
@@ -113,102 +97,111 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Marks/Questions</TableHead>
-          <TableHead>Time Limit</TableHead>
-          <TableHead>Published</TableHead>
-          <TableHead>Score</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {tests.map((test) => (
-          <TableRow key={test.id}>
-            <TableCell>
-              <div className="font-medium">{test.title}</div>
-              <div className="text-sm text-muted-foreground">{test.description}</div>
-            </TableCell>
-            <TableCell>
-              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
-                <div className="font-medium">
-                  {test.attempt.score}/{test.totalQuestions}
-                </div>
-              ) : (
-                <div className="text-muted-foreground">-/{test.totalQuestions}</div>
-              )}
-            </TableCell>
-            <TableCell>{test.timeLimit ? `${test.timeLimit} minutes` : "N/A"}</TableCell>
-            <TableCell>
-              <div className="text-sm">
-                {formatDistanceToNow(new Date(test.publishedAt), { addSuffix: true })}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {new Date(test.publishedAt).toLocaleDateString()}
-              </div>
-            </TableCell>
-            <TableCell>
-              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
-                (() => {
-                  const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
-                  return (
-                    <Badge className={getScoreColor(percentage)}>
-                      {percentage}%
-                    </Badge>
-                  )
-                })()
-              ) : (
-                <span className="text-muted-foreground text-sm">-</span>
-              )}
-            </TableCell>
-            <TableCell>
-              {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
-                (() => {
-                  const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
-                  return (
-                    <Badge className={getPassFailStatus(percentage, test.passingPercentage).className}>
-                      {getPassFailStatus(percentage, test.passingPercentage).text}
-                    </Badge>
-                  )
-                })()
-              ) : (
-                <Badge variant="outline">N/A</Badge>
-              )}
-            </TableCell>
-            <TableCell>
-              <div className="flex gap-2 flex-wrap">
-                {test.canTakeTest ? (
-                  <Button
-                    size="sm"
-                    onClick={() => handleTakePublishedTest(test.id)}
-                    className="bg-orange-600 hover:bg-orange-700"
-                  >
-                    Take Test
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => router.push(`/published-test/${test.id}/results`)}
-                  >
-                    View Results
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSaveForPractice(test.id)}
-                  disabled={test.isSaved || savingStates[test.id]}
-                >
-                  {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save"}
-                </Button>
-              </div>
-            </TableCell>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Marks</TableHead>
+            <TableHead>Time Limit</TableHead>
+            <TableHead>Published</TableHead>
+            <TableHead>Score</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {tests.map((test) => (
+            <TableRow key={test.id}>
+              <TableCell>
+                <div className="font-medium">{test.title}</div>
+                <div className="text-sm text-muted-foreground">{test.description}</div>
+              </TableCell>
+              <TableCell>
+                {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                  <div className="font-medium">
+                    {test.attempt.score}/{test.totalQuestions}
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">-/{test.totalQuestions}</div>
+                )}
+              </TableCell>
+              <TableCell>{test.timeLimit ? `${test.timeLimit} minutes` : "N/A"}</TableCell>
+              <TableCell>
+                <div className="text-sm">
+                  {formatDistanceToNow(new Date(test.publishedAt), { addSuffix: true })}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(test.publishedAt).toLocaleDateString()}
+                </div>
+              </TableCell>
+              <TableCell>
+                {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                  (() => {
+                    const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
+                    return (
+                      <Badge className={getScoreColor(percentage)}>
+                        {percentage}%
+                      </Badge>
+                    )
+                  })()
+                ) : (
+                  <span className="text-muted-foreground text-sm">-</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {test.hasAttempted && test.attempt?.score !== null && test.attempt?.score !== undefined ? (
+                  (() => {
+                    const percentage = calculatePercentage(test.attempt.score, test.totalQuestions)
+                    return (
+                      <Badge className={getPassFailStatus(percentage, test.passingPercentage).className}>
+                        {getPassFailStatus(percentage, test.passingPercentage).text}
+                      </Badge>
+                    )
+                  })()
+                ) : (
+                  <Badge variant="outline">N/A</Badge>
+                )}
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2 flex-wrap">
+                  {test.canTakeTest ? (
+                    <Button
+                      size="sm"
+                      onClick={() => handleTakePublishedTest(test.id)}
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      Take Test
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => router.push(`/published-test/${test.id}/results`)}
+                    >
+                      View Results
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSaveForPracticeClick(test.id, test.title)}
+                    disabled={test.isSaved || savingStates[test.id]}
+                  >
+                    {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save"}
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <PublishedTestSaveDialog
+        isOpen={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        testId={selectedTestId || ""}
+        testTitle={selectedTestTitle}
+        onSaveSuccess={handleSaveSuccess}
+      />
+    </>
   )
 }

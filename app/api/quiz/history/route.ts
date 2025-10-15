@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
           orderBy: {
             completedAt: 'desc'
           }
-        }
+        },
+        // @ts-ignore - Prisma client generation issue workaround
+        folder: true
       },
       orderBy: {
         updatedAt: 'desc'
@@ -50,12 +52,32 @@ export async function GET(request: NextRequest) {
         totalAttempts: attempts.length,
         highestScore,
         latestScore: latestAttempt?.score || null,
-        lastAttemptDate: latestAttempt?.completedAt || null
+        lastAttemptDate: latestAttempt?.completedAt || null,
+        // @ts-ignore - Prisma client generation issue workaround
+        folderId: quiz.folderId,
+        // @ts-ignore - Prisma client generation issue workaround
+        folder: quiz.folder ? {
+          id: quiz.folder.id,
+          name: quiz.folder.name,
+          isDefault: quiz.folder.isDefault
+        } : null
+      }
+    })
+
+    // Also fetch folders for the user
+    // @ts-ignore - Prisma client generation issue workaround
+    const folders = await prisma.folder.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'asc'
       }
     })
 
     return NextResponse.json({
-      quizzes: quizHistory
+      quizzes: quizHistory,
+      folders
     })
   } catch (error) {
     console.error("Fetch quiz history error:", error)

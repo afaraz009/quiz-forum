@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import type { QuizQuestion } from "@/types/quiz"
+import { FolderSelector } from "@/components/folder-selector"
 
 interface QuizSaveDialogProps {
   isOpen: boolean
@@ -28,6 +29,7 @@ interface QuizSaveDialogProps {
 export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess, currentScore, currentAnswers }: QuizSaveDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [folderId, setFolderId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSave = async () => {
@@ -47,6 +49,7 @@ export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess, curr
           title: title.trim(),
           description: description.trim() || null,
           questions,
+          folderId,
         }),
       })
 
@@ -83,6 +86,7 @@ export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess, curr
         onSaveSuccess(quizId)
         setTitle("")
         setDescription("")
+        setFolderId(null)
         onClose()
       } else {
         toast.error(data.error || "Failed to save quiz")
@@ -123,6 +127,7 @@ export function QuizSaveDialog({ isOpen, onClose, questions, onSaveSuccess, curr
               rows={3}
             />
           </div>
+          <FolderSelector value={folderId} onValueChange={setFolderId} />
           <div className="text-sm text-muted-foreground">
             Questions: {questions.length}
           </div>
