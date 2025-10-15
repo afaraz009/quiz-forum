@@ -98,7 +98,12 @@ export default function DashboardPage() {
       // Filter by folder
       if (selectedFolder !== null) {
         if (selectedFolder === "uncategorized") {
-          filtered = filtered.filter(quiz => !quiz.folderId)
+          // Show quizzes that are truly uncategorized (folderId is null) OR
+          // quizzes that are in any folder named "Uncategorized"
+          filtered = filtered.filter(quiz => 
+            !quiz.folderId || 
+            (quiz.folder && quiz.folder.name.toLowerCase() === "uncategorized")
+          )
         } else {
           filtered = filtered.filter(quiz => quiz.folderId === selectedFolder)
         }

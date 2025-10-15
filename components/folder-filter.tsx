@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown, FolderPlus, FolderOpen } from "lucide-react"
-import { FolderManager } from "@/components/folder-manager"
 
 interface Folder {
   id: string
@@ -73,10 +72,7 @@ export function FolderFilter({ folders, selectedFolder, onFolderSelect, onFolder
         </DropdownMenuContent>
       </DropdownMenu>
       
-      <FolderManager 
-        folders={folders} 
-        onFoldersChange={onFoldersChange} 
-      />
+      {/* Removed the extra "Create New Folder" button */}
     </div>
   )
 }

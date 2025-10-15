@@ -78,16 +78,7 @@ export function FolderSelector({ value, onValueChange, showCreateOption = false 
             </SelectContent>
           </Select>
         </div>
-        {showCreateOption && (
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => setIsManagerOpen(true)}
-            className="h-10 w-10"
-          >
-            <FolderPlus className="h-4 w-4" />
-          </Button>
-        )}
+        {/* Removed the extra "Create New Folder" button to avoid duplicates */}
       </div>
       
       {showCreateOption && (
