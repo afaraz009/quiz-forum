@@ -65,7 +65,24 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.sub!
-        session.user.isAdmin = token.isAdmin as boolean
+        
+        // Fetch the latest user data to ensure isAdmin is up to date
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              id: token.sub!
+            }
+          })
+          
+          if (user) {
+            session.user.isAdmin = user.isAdmin
+          } else {
+            session.user.isAdmin = token.isAdmin as boolean || false
+          }
+        } catch (error) {
+          console.error("Error fetching user in session callback:", error)
+          session.user.isAdmin = token.isAdmin as boolean || false
+        }
       }
       return session
     },
