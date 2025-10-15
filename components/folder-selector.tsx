@@ -40,6 +40,9 @@ export function FolderSelector({ value, onValueChange }: FolderSelectorProps) {
     fetchFolders()
   }, [])
 
+  // Filter out the default "Uncategorized" folder from the list since we're adding it manually
+  const nonDefaultFolders = folders.filter(folder => !folder.isDefault)
+
   return (
     <div className="grid gap-2">
       <Label htmlFor="folder">Folder (optional)</Label>
@@ -49,7 +52,7 @@ export function FolderSelector({ value, onValueChange }: FolderSelectorProps) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="uncategorized">Uncategorized</SelectItem>
-          {folders.map((folder) => (
+          {nonDefaultFolders.map((folder) => (
             <SelectItem key={folder.id} value={folder.id}>
               {folder.name}
             </SelectItem>
