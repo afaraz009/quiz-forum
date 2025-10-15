@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PublishedTestsTable } from "@/components/published-tests-table"
-import { PracticeQuizzesTable } from "@/components/practice-quizzes-table"
-import { FolderManager } from "@/components/folder-manager"
+import { EnhancedPracticeQuizzesTable } from "@/components/enhanced-practice-quizzes-table"
+import { FolderFilter } from "@/components/folder-filter"
 import { toast } from "sonner"
 
 interface QuizHistory {
@@ -302,53 +302,20 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3 py-1">
-                  Practice Mode
-                </Badge>
+                      Practice Mode
+                  </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Folder and Search Controls */}
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Folder Filter */}
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant={selectedFolder === null ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedFolder(null)}
-                  >
-                    All Quizzes
-                  </Button>
-                  <Button
-                    variant={selectedFolder === "uncategorized" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedFolder("uncategorized")}
-                  >
-                    Uncategorized
-                  </Button>
-                  {folders.filter(f => !f.isDefault).map(folder => (
-                    <Button
-                      key={folder.id}
-                      variant={selectedFolder === folder.id ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedFolder(folder.id)}
-                      className="flex items-center gap-1"
-                    >
-                      {folder.name}
-                      {!folder.isDefault && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteFolder(folder.id, folder.name)
-                          }}
-                          className="ml-1 text-xs hover:bg-destructive/20 rounded-full p-1"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </Button>
-                  ))}
-                  <FolderManager folders={folders} onFoldersChange={setFolders} />
-                </div>
+                <FolderFilter
+                  folders={folders}
+                  selectedFolder={selectedFolder}
+                  onFolderSelect={setSelectedFolder}
+                  onFoldersChange={setFolders}
+                />
                 
                 {/* Search */}
                 <div className="relative flex-1">
@@ -383,7 +350,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <PracticeQuizzesTable quizzes={filteredQuizzes} />
+                <EnhancedPracticeQuizzesTable quizzes={filteredQuizzes} />
               )}
             </CardContent>
           </Card>

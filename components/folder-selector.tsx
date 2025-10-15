@@ -9,6 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { FolderPlus } from "lucide-react"
+import { FolderManager } from "@/components/folder-manager"
 
 interface Folder {
   id: string
@@ -19,10 +22,12 @@ interface Folder {
 interface FolderSelectorProps {
   value: string | null
   onValueChange: (value: string | null) => void
+  showCreateOption?: boolean
 }
 
-export function FolderSelector({ value, onValueChange }: FolderSelectorProps) {
+export function FolderSelector({ value, onValueChange, showCreateOption = false }: FolderSelectorProps) {
   const [folders, setFolders] = useState<Folder[]>([])
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
 
   useEffect(() => {
     const fetchFolders = async () => {
@@ -46,19 +51,53 @@ export function FolderSelector({ value, onValueChange }: FolderSelectorProps) {
   return (
     <div className="grid gap-2">
       <Label htmlFor="folder">Folder (optional)</Label>
-      <Select value={value || "uncategorized"} onValueChange={(val) => onValueChange(val === "uncategorized" ? null : val)}>
-        <SelectTrigger id="folder">
-          <SelectValue placeholder="Select a folder" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="uncategorized">Uncategorized</SelectItem>
-          {nonDefaultFolders.map((folder) => (
-            <SelectItem key={folder.id} value={folder.id}>
-              {folder.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <Select value={value || "uncategorized"} onValueChange={(val) => onValueChange(val === "uncategorized" ? null : val)}>
+            <SelectTrigger id="folder">
+              <SelectValue placeholder="Select a folder" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="uncategorized">Uncategorized</SelectItem>
+              {nonDefaultFolders.map((folder) => (
+                <SelectItem key={folder.id} value={folder.id}>
+                  {folder.name}
+                </SelectItem>
+              ))}
+              {showCreateOption && (
+                <>
+                  <div className="border-t my-1"></div>
+                  <SelectItem value="create-new" className="text-primary">
+                    <div className="flex items-center gap-2">
+                      <FolderPlus className="h-4 w-4" />
+                      Create New Folder
+                    </div>
+                  </SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        {showCreateOption && (
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setIsManagerOpen(true)}
+            className="h-10 w-10"
+          >
+            <FolderPlus className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      
+      {showCreateOption && (
+        <FolderManager 
+          folders={folders} 
+          onFoldersChange={setFolders} 
+          isOpen={isManagerOpen}
+          onOpenChange={setIsManagerOpen}
+        />
+      )}
     </div>
   )
 }
