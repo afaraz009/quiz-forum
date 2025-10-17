@@ -185,7 +185,7 @@ export function PublishedTestsTable({ tests }: PublishedTestsTableProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleSaveForPracticeClick(test.id, test.title)}
-                    disabled={test.isSaved || savingStates[test.id]}
+                    disabled={!test.hasAttempted || test.isSaved || savingStates[test.id]}
                   >
                     {savingStates[test.id] ? "Saving..." : test.isSaved ? "Saved" : "Save"}
                   </Button>

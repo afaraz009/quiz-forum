@@ -345,7 +345,7 @@ export default function PublishedTestPage() {
                 <Button
                   variant="outline"
                   onClick={handleSaveForPractice}
-                  disabled={isSaving || isSaved}
+                  disabled={!testData.hasAttempted || isSaving || isSaved}
                   size="lg"
                 >
                   {isSaving ? "Saving..." : isSaved ? "Saved for Practice" : "Save"}
@@ -398,7 +398,7 @@ export default function PublishedTestPage() {
                     size="sm"
                     variant="outline"
                     onClick={handleSaveForPractice}
-                    disabled={isSaving || isSaved}
+                    disabled={!testData.hasAttempted || isSaving || isSaved}
                   >
                     {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
                   </Button>
@@ -448,7 +448,7 @@ export default function PublishedTestPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleSaveForPractice}
-                    disabled={isSaving || isSaved}
+                    disabled={!testData.hasAttempted || isSaving || isSaved}
                   >
                     {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
                   </Button>
