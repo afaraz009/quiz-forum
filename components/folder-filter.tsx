@@ -8,7 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown, FolderPlus, FolderOpen } from "lucide-react"
+import { ChevronDown, FolderPlus, FolderOpen, Pen, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Folder {
   id: string
@@ -37,6 +38,58 @@ export function FolderFilter({ folders, selectedFolder, onFolderSelect, onFolder
     }
   }
 
+  const handleDeleteFolder = async (folderId: string, folderName: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "DELETE",
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`Folder "${folderName}" deleted successfully!`)
+        onFoldersChange(folders.filter(folder => folder.id !== folderId))
+        
+        // If the deleted folder was selected, reset to all quizzes
+        if (selectedFolder === folderId) {
+          onFolderSelect(null)
+        }
+      } else {
+        toast.error(data.error || "Failed to delete folder")
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the folder")
+    }
+  }
+
+  const handleEditFolder = async (folderId: string, currentName: string) => {
+    const newName = prompt("Enter new folder name:", currentName)
+    if (!newName || newName.trim() === "" || newName === currentName) return
+
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newName.trim() }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`Folder renamed to "${newName}" successfully!`)
+        onFoldersChange(folders.map(folder => 
+          folder.id === folderId ? { ...folder, name: newName.trim() } : folder
+        ))
+      } else {
+        toast.error(data.error || "Failed to rename folder")
+      }
+    } catch (error) {
+      toast.error("An error occurred while renaming the folder")
+    }
+  }
+
   return (
     <div className="flex items-center gap-2">
       <DropdownMenu>
@@ -47,7 +100,7 @@ export function FolderFilter({ folders, selectedFolder, onFolderSelect, onFolder
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuContent align="start" sideOffset={4} className="w-56">
           <DropdownMenuItem onClick={() => onFolderSelect(null)}>
             All Quizzes
           </DropdownMenuItem>
@@ -62,6 +115,32 @@ export function FolderFilter({ folders, selectedFolder, onFolderSelect, onFolder
               className="flex items-center justify-between"
             >
               <span>{folder.name}</span>
+              <div className="flex gap-1 ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-primary/10"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditFolder(folder.id, folder.name)
+                  }}
+                >
+                  <Pen className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-destructive/10"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (confirm(`Are you sure you want to delete the folder "${folder.name}"? All quizzes in this folder will be moved to Uncategorized.`)) {
+                      handleDeleteFolder(folder.id, folder.name)
+                    }
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
             </DropdownMenuItem>
           ))}
           <div className="border-t my-1"></div>

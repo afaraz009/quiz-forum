@@ -41,7 +41,7 @@ export function UserNav() {
           <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all duration-200 group">
             <Avatar className="h-9 w-9 transition-transform duration-200 group-hover:scale-105">
               <AvatarImage 
-                src={session.user?.image || ""} 
+                src="" 
                 alt={session.user?.name || "User avatar"} 
                 className="object-cover"
               />
@@ -54,6 +54,7 @@ export function UserNav() {
         <DropdownMenuContent 
           className="w-64 p-2 shadow-lg border-border/50 bg-card/95 backdrop-blur-sm" 
           align="end" 
+          sideOffset={4}
           forceMount
         >
           <DropdownMenuLabel className="font-normal p-3 bg-muted/30 rounded-lg mb-2">

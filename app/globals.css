@@ -314,4 +314,9 @@
   code {
     font-family: 'Fira Code', monospace;
   }
+
+  /* Code block styling */
+  code {
+    font-family: 'Fira Code', monospace;
+  }
 }

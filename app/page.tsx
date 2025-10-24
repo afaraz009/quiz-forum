@@ -173,6 +173,17 @@ export default function Home() {
           />
         </div>
       )}
+      {/* Dashboard button for authenticated users on homepage */}
+      <div className="fixed bottom-6 right-6">
+        <Button 
+          onClick={() => router.push("/dashboard")} 
+          size="lg"
+          className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+        >
+          Dashboard
+          <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200">↗</span>
+        </Button>
+      </div>
     </div>
   )
 }

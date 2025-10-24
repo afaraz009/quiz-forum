@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { FolderPlus } from "lucide-react"
+import { FolderPlus, Pen, Trash2 } from "lucide-react"
 
 interface Folder {
   id: string
@@ -83,6 +83,34 @@ export function FolderManager({ folders, onFoldersChange, isOpen, onOpenChange }
     }
   }
 
+  const handleEditFolder = async (folderId: string, currentName: string) => {
+    const newName = prompt("Enter new folder name:", currentName)
+    if (!newName || newName.trim() === "" || newName === currentName) return
+
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newName.trim() }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`Folder renamed to "${newName}" successfully!`)
+        onFoldersChange(folders.map(folder => 
+          folder.id === folderId ? { ...folder, name: newName.trim() } : folder
+        ))
+      } else {
+        toast.error(data.error || "Failed to rename folder")
+      }
+    } catch (error) {
+      toast.error("An error occurred while renaming the folder")
+    }
+  }
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -93,35 +121,74 @@ export function FolderManager({ folders, onFoldersChange, isOpen, onOpenChange }
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Folder</DialogTitle>
+          <DialogTitle>Manage Folders</DialogTitle>
           <DialogDescription>
-            Create a new folder to organize your quizzes.
+            Create new folders or manage existing ones.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <label htmlFor="folder-name" className="text-sm font-medium">
-              Folder Name
+              Create New Folder
             </label>
-            <Input
-              id="folder-name"
-              placeholder="Enter folder name..."
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreateFolder()
-                }
-              }}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="folder-name"
+                placeholder="Enter folder name..."
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCreateFolder()
+                  }
+                }}
+              />
+              <Button onClick={handleCreateFolder} disabled={isCreating}>
+                {isCreating ? "Creating..." : "Create"}
+              </Button>
+            </div>
           </div>
+          
+          {folders.filter(f => !f.isDefault).length > 0 && (
+            <div className="grid gap-2 pt-4 border-t">
+              <label className="text-sm font-medium">
+                Existing Folders
+              </label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {folders.filter(f => !f.isDefault).map(folder => (
+                  <div key={folder.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                    <span className="text-sm">{folder.name}</span>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-primary/10"
+                        onClick={() => handleEditFolder(folder.id, folder.name)}
+                      >
+                        <Pen className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-destructive/10"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete the folder "${folder.name}"? All quizzes in this folder will be moved to Uncategorized.`)) {
+                            handleDeleteFolder(folder.id, folder.name)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isCreating}>
-            Cancel
-          </Button>
-          <Button onClick={handleCreateFolder} disabled={isCreating}>
-            {isCreating ? "Creating..." : "Create Folder"}
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>
