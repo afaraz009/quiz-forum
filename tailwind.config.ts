@@ -103,11 +103,47 @@ const config: Config = {
   				to: {
   					height: '0'
   				}
+  			},
+  			'slide-in-from-top-1': {
+  				from: {
+  					transform: 'translateY(-0.25rem)'
+  				},
+  				to: {
+  					transform: 'translateY(0)'
+  				}
+  			},
+  			'slide-in-from-bottom-1': {
+  				from: {
+  					transform: 'translateY(0.25rem)'
+  				},
+  				to: {
+  					transform: 'translateY(0)'
+  				}
+  			},
+  			'slide-in-from-left-1': {
+  				from: {
+  					transform: 'translateX(-0.25rem)'
+  				},
+  				to: {
+  					transform: 'translateX(0)'
+  				}
+  			},
+  			'slide-in-from-right-1': {
+  				from: {
+  					transform: 'translateX(0.25rem)'
+  				},
+  				to: {
+  					transform: 'translateX(0)'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'slide-in-from-top-1': 'slide-in-from-top-1 0.15s ease-out',
+  			'slide-in-from-bottom-1': 'slide-in-from-bottom-1 0.15s ease-out',
+  			'slide-in-from-left-1': 'slide-in-from-left-1 0.15s ease-out',
+  			'slide-in-from-right-1': 'slide-in-from-right-1 0.15s ease-out'
   		}
   	}
   },

@@ -1,0 +1,72 @@
+/* Custom dropdown animations to fix origin point issues */
+@keyframes slideDownAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRightAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideLeftAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Override Radix UI animations with custom ones */
+.radix-dropdown[data-state="open"] {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
+  animation-duration: 0.15s !important;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.radix-dropdown[data-side="top"][data-state="open"] {
+  animation-name: slideDownAndFade !important;
+}
+
+.radix-dropdown[data-side="bottom"][data-state="open"] {
+  animation-name: slideUpAndFade !important;
+}
+
+.radix-dropdown[data-side="left"][data-state="open"] {
+  animation-name: slideRightAndFade !important;
+}
+
+.radix-dropdown[data-side="right"][data-state="open"] {
+  animation-name: slideLeftAndFade !important;
+}
+
+/* Ensure proper display */
+.radix-dropdown {
+  display: block !important;
+}

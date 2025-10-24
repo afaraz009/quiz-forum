@@ -57,6 +57,7 @@ export default function TestResultsPage() {
   const [resultData, setResultData] = useState<TestResultData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showOnlyIncorrect, setShowOnlyIncorrect] = useState(false) // New state for filtering incorrect answers
 
   useEffect(() => {
     if (session?.user && testId) {
@@ -115,6 +116,26 @@ export default function TestResultsPage() {
   }
 
   const { attempt, questions, passed, percentage } = resultData
+
+  // Filter questions to show only incorrect ones
+  const getIncorrectQuestions = () => {
+    return questions
+      .map((question, index) => {
+        const userAnswer = attempt.answers[index] || ''
+        const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
+        const isUnanswered = !userAnswer.trim()
+        return { question, index, userAnswer, isCorrect, isUnanswered }
+      })
+      .filter(item => !item.isCorrect)
+  }
+
+  // Questions to display (all or only incorrect)
+  const questionsToDisplay = showOnlyIncorrect ? getIncorrectQuestions() : questions.map((question, index) => {
+    const userAnswer = attempt.answers[index] || ''
+    const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
+    const isUnanswered = !userAnswer.trim()
+    return { question, index, userAnswer, isCorrect, isUnanswered }
+  })
 
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-4xl">
@@ -175,19 +196,19 @@ export default function TestResultsPage() {
       </div>
 
       {/* Pass/Fail Banner */}
-      <Card className={`mb-6 border-2 ${passed ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+      <Card className={`mb-6 border-2 ${passed ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30'}`}>
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             {passed ? (
-              <CheckCircle className="h-6 w-6 text-green-600" />
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             ) : (
-              <XCircle className="h-6 w-6 text-red-600" />
+              <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
             )}
-            <h2 className={`text-xl font-bold ${passed ? 'text-green-800' : 'text-red-800'}`}>
+            <h2 className={`text-xl font-bold ${passed ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>
               {passed ? 'Congratulations! You passed the test.' : 'You did not pass this time.'}
             </h2>
           </div>
-          <p className={`${passed ? 'text-green-700' : 'text-red-700'}`}>
+          <p className={`${passed ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
             {passed
               ? `You scored ${percentage}% which exceeds the required ${resultData.passingPercentage}% to pass.`
               : `You scored ${percentage}% but needed ${resultData.passingPercentage}% to pass.`
@@ -196,53 +217,67 @@ export default function TestResultsPage() {
         </CardContent>
       </Card>
 
+      {/* Toggle Button for Incorrect Answers */}
+      <div className="flex justify-end mb-4">
+        <Button 
+          variant={showOnlyIncorrect ? "default" : "outline"} 
+          onClick={() => setShowOnlyIncorrect(!showOnlyIncorrect)}
+        >
+          {showOnlyIncorrect ? "Show All Questions" : "Show Only Incorrect"}
+        </Button>
+      </div>
+
       {/* Question Review */}
       <Card>
         <CardHeader>
           <CardTitle>Question Review</CardTitle>
-          <CardDescription>Review your answers and see the correct solutions</CardDescription>
+          <CardDescription>
+            {showOnlyIncorrect 
+              ? "Review your incorrect answers and see the correct solutions" 
+              : "Review your answers and see the correct solutions"}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {questions.map((question, index) => {
-            const userAnswer = attempt.answers[index] || ''
-            const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
-            const isUnanswered = !userAnswer.trim()
+          {questionsToDisplay.map((item) => {
+            // If showing only incorrect, item is already filtered
+            // If showing all, we need to extract the properties
+            const { question, index, userAnswer, isCorrect, isUnanswered } = showOnlyIncorrect ? item : item as any;
 
             return (
               <div key={index} className={`p-4 rounded-lg border-2 ${
-                isCorrect ? 'border-green-200 bg-green-50' :
-                isUnanswered ? 'border-yellow-200 bg-yellow-50' :
-                'border-red-200 bg-red-50'
+                isCorrect ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30' :
+                isUnanswered ? 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/30' :
+                'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30'
               }`}>
                 <div className="flex items-start gap-2 mb-3">
                   {isCorrect ? (
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
                   ) : isUnanswered ? (
-                    <Clock className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-2 text-gray-900">Question {index + 1}</h3>
-                    <p className="text-gray-800 mb-3">{processTextWithCode(question.question)}</p>
+                    <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Question {index + 1}</h3>
+                    <p className="text-gray-800 dark:text-gray-200 mb-3">{processTextWithCode(question.question)}</p>
 
                     {/* Multiple choice options */}
                     {question.options && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                        {question.options.map((option, optionIndex) => {
+                        {question.options.map((option: string, optionIndex: number) => {
                           const isUserChoice = userAnswer === option
                           const isCorrectAnswer = option === question.correctAnswer
 
                           return (
                             <div key={optionIndex} className={`p-2 rounded border ${
-                              isCorrectAnswer ? 'bg-green-100 border-green-300' :
-                              isUserChoice && !isCorrectAnswer ? 'bg-red-100 border-red-300' :
-                              'bg-gray-50 border-gray-200'
+                              isCorrectAnswer ? 'bg-green-100 border-green-300 dark:bg-green-900/50 dark:border-green-700' :
+                              isUserChoice && !isCorrectAnswer ? 'bg-red-100 border-red-300 dark:bg-red-900/50 dark:border-red-700' :
+                              'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
                             }`}>
                               <div className="flex items-center gap-2">
-                                {isCorrectAnswer && <CheckCircle className="h-4 w-4 text-green-600" />}
-                                {isUserChoice && !isCorrectAnswer && <XCircle className="h-4 w-4 text-red-600" />}
-                                <span className={`${isCorrectAnswer ? 'font-medium text-green-800' : 'text-gray-800'}`}>{processTextWithCode(option)}</span>
+                                {isCorrectAnswer && <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />}
+                                {isUserChoice && !isCorrectAnswer && <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />}
+                                <span className={`${isCorrectAnswer ? 'font-medium text-green-800 dark:text-green-200' : 'text-gray-800 dark:text-gray-200'}`}>{processTextWithCode(option)}</span>
                               </div>
                             </div>
                           )
@@ -253,18 +288,18 @@ export default function TestResultsPage() {
                     {/* Answer summary */}
                     <div className="space-y-1 text-sm">
                       <div className="flex gap-2">
-                        <span className="font-medium text-gray-900">Your answer:</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">Your answer:</span>
                         <span className={
-                          isUnanswered ? 'text-yellow-700 italic' :
-                          isCorrect ? 'text-green-700' : 'text-red-700'
+                          isUnanswered ? 'text-yellow-700 dark:text-yellow-300 italic' :
+                          isCorrect ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
                         }>
                           {isUnanswered ? 'No answer provided' : processTextWithCode(userAnswer)}
                         </span>
                       </div>
                       {!isCorrect && (
                         <div className="flex gap-2">
-                          <span className="font-medium text-gray-900">Correct answer:</span>
-                          <span className="text-green-700">{processTextWithCode(question.correctAnswer)}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">Correct answer:</span>
+                          <span className="text-green-700 dark:text-green-300">{processTextWithCode(question.correctAnswer)}</span>
                         </div>
                       )}
                     </div>

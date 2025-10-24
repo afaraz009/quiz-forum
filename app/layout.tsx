@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import '../styles/dropdown-animations.css'
 import { Providers } from '@/components/providers'
 import { UserNav } from '@/components/user-nav'
 import Link from 'next/link'

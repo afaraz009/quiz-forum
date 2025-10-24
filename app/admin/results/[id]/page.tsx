@@ -92,6 +92,7 @@ export default function TestResultsDetail() {
   const [sortBy, setSortBy] = useState("completedAt")
   const [selectedStudent, setSelectedStudent] = useState<StudentAttempt | null>(null)
   const [showAnswers, setShowAnswers] = useState(false)
+  const [showOnlyIncorrect, setShowOnlyIncorrect] = useState(false) // New state for filtering incorrect answers
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchTestDetails = useCallback(async () => {
@@ -185,6 +186,7 @@ export default function TestResultsDetail() {
   const viewStudentAnswers = (student: StudentAttempt) => {
     setSelectedStudent(student)
     setShowAnswers(true)
+    setShowOnlyIncorrect(false) // Reset to show all answers by default
   }
 
   if (isLoading) {
@@ -211,6 +213,19 @@ export default function TestResultsDetail() {
   }
 
   const { test, attempts, analytics } = testDetails
+
+  // Filter questions to show only incorrect ones
+  const getIncorrectQuestions = (student: StudentAttempt) => {
+    if (!test.questions) return []
+    
+    return test.questions
+      .map((question, index) => {
+        const userAnswer = student.answers[index.toString()] || 'No answer'
+        const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
+        return { question, index, userAnswer, isCorrect }
+      })
+      .filter(item => !item.isCorrect)
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -452,17 +467,30 @@ export default function TestResultsDetail() {
                     • Completed {formatDistanceToNow(new Date(selectedStudent.completedAt), { addSuffix: true })}
                   </CardDescription>
                 </div>
-                <Button variant="outline" onClick={() => setShowAnswers(false)}>
-                  Close
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={showOnlyIncorrect ? "default" : "outline"} 
+                    onClick={() => setShowOnlyIncorrect(!showOnlyIncorrect)}
+                  >
+                    {showOnlyIncorrect ? "Show All Questions" : "Show Only Incorrect"}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowAnswers(false)}>
+                    Close
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-6 overflow-y-auto max-h-[60vh]">
               <div className="space-y-6">
-                {test.questions.map((question, index) => {
+                {(showOnlyIncorrect ? getIncorrectQuestions(selectedStudent) : test.questions.map((question, index) => {
                   const userAnswer = selectedStudent.answers[index.toString()] || 'No answer'
                   const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
-
+                  return { question, index, userAnswer, isCorrect }
+                })).map((item) => {
+                  // If showing only incorrect, item is already filtered
+                  // If showing all, we need to extract the properties
+                  const { question, index, userAnswer, isCorrect } = showOnlyIncorrect ? item : item as any;
+                  
                   return (
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -479,11 +507,11 @@ export default function TestResultsDetail() {
                         <div className="mb-3">
                           <p className="text-sm font-medium mb-2">Options:</p>
                           <div className="grid grid-cols-2 gap-2 text-sm">
-                            {question.options.map((option, optIdx) => (
+                            {question.options.map((option: string, optIdx: number) => (
                               <div key={optIdx} className={`p-2 rounded ${
-                                option === question.correctAnswer ? 'bg-green-100 text-green-700' :
-                                option === userAnswer ? 'bg-red-100 text-red-700' :
-                                'bg-gray-50'
+                                option === question.correctAnswer ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' :
+                                option === userAnswer ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' :
+                                'bg-gray-50 dark:bg-gray-800'
                               }`}>
                                 {option === question.correctAnswer && '✓ '}
                                 {option === userAnswer && option !== question.correctAnswer && '✗ '}
@@ -496,14 +524,14 @@ export default function TestResultsDetail() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="font-medium text-gray-600">Student Answer:</p>
-                          <p className={`p-2 rounded ${isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                          <p className="font-medium text-gray-600 dark:text-gray-300">Student Answer:</p>
+                          <p className={`p-2 rounded ${isCorrect ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
                             {processTextWithCode(userAnswer)}
                           </p>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-600">Correct Answer:</p>
-                          <p className="p-2 rounded bg-green-50 text-green-700">
+                          <p className="font-medium text-gray-600 dark:text-gray-300">Correct Answer:</p>
+                          <p className="p-2 rounded bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                             {processTextWithCode(question.correctAnswer)}
                           </p>
                         </div>
