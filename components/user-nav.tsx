@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useSession, signOut } from "next-auth/react"
-import { Button } from "@/components/ui/button"
+import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,13 +9,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { User } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { User } from "lucide-react";
 
 export function UserNav() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   if (!session) {
     return (
@@ -30,7 +30,7 @@ export function UserNav() {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -38,22 +38,29 @@ export function UserNav() {
       <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all duration-200 group">
+          <Button
+            variant="ghost"
+            className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-primary/20 hover:bg-transparent transition-all duration-200 group"
+          >
             <Avatar className="h-9 w-9 transition-transform duration-200 group-hover:scale-105">
-              <AvatarImage 
-                src="" 
-                alt={session.user?.name || "User avatar"} 
+              <AvatarImage
+                src=""
+                alt={session.user?.name || "User avatar"}
                 className="object-cover"
               />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {session.user?.name ? session.user.name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                {session.user?.name ? (
+                  session.user.name.charAt(0).toUpperCase()
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
               </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className="w-64 p-2 shadow-lg border-border/50 bg-card/95 backdrop-blur-sm" 
-          align="end" 
+        <DropdownMenuContent
+          className="w-64 p-2 shadow-lg border-border/50 bg-card/95 backdrop-blur-sm"
+          align="end"
           sideOffset={4}
           forceMount
         >
@@ -75,7 +82,9 @@ export function UserNav() {
               </span>
               <div className="flex flex-col">
                 <span className="font-medium">Start New Quiz</span>
-                <span className="text-xs text-muted-foreground">Create and take quizzes</span>
+                <span className="text-xs text-muted-foreground">
+                  Create and take quizzes
+                </span>
               </div>
             </a>
           </DropdownMenuItem>
@@ -86,7 +95,9 @@ export function UserNav() {
               </span>
               <div className="flex flex-col">
                 <span className="font-medium">Dashboard</span>
-                <span className="text-xs text-muted-foreground">View your progress</span>
+                <span className="text-xs text-muted-foreground">
+                  View your progress
+                </span>
               </div>
             </a>
           </DropdownMenuItem>
@@ -94,8 +105,8 @@ export function UserNav() {
           <DropdownMenuItem
             className="cursor-pointer rounded-lg p-3 focus:bg-destructive/10 focus:text-destructive transition-colors duration-200"
             onSelect={(event) => {
-              event.preventDefault()
-              signOut()
+              event.preventDefault();
+              signOut();
             }}
           >
             <div className="w-full flex items-center gap-3">
@@ -104,12 +115,14 @@ export function UserNav() {
               </span>
               <div className="flex flex-col">
                 <span className="font-medium">Sign Out</span>
-                <span className="text-xs text-muted-foreground">End your session</span>
+                <span className="text-xs text-muted-foreground">
+                  End your session
+                </span>
               </div>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }

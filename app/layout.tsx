@@ -1,19 +1,18 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import '../styles/dropdown-animations.css'
-import { Providers } from '@/components/providers'
-import { UserNav } from '@/components/user-nav'
-import Link from 'next/link'
+import type { Metadata } from "next";
+import "./globals.css";
+import { Providers } from "@/components/providers";
+import { UserNav } from "@/components/user-nav";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: 'Quiz Forum',
-  description: 'Interactive quiz application with user authentication',
-}
+  title: "Quiz Forum",
+  description: "Interactive quiz application with user authentication",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -30,12 +29,10 @@ export default function RootLayout({
                 <UserNav />
               </div>
             </header>
-            <main className="flex-1 animate-fade-in">
-              {children}
-            </main>
+            <main className="flex-1 animate-fade-in">{children}</main>
           </div>
         </Providers>
       </body>
     </html>
-  )
+  );
 }
