@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import { LoadingPage } from "@/components/ui/loading-spinner";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
@@ -56,11 +57,7 @@ export default function LoginPage() {
   };
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   if (session) {

@@ -1,198 +1,213 @@
-"use client"
+"use client";
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { PublishedTestsTable } from "@/components/published-tests-table"
-import { EnhancedPracticeQuizzesTable } from "@/components/enhanced-practice-quizzes-table"
-import { FolderFilter } from "@/components/folder-filter"
-import { toast } from "sonner"
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { PublishedTestsTable } from "@/components/published-tests-table";
+import { EnhancedPracticeQuizzesTable } from "@/components/enhanced-practice-quizzes-table";
+import { FolderFilter } from "@/components/folder-filter";
+import { toast } from "sonner";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface QuizHistory {
-  id: string
-  title: string
-  description: string | null
-  totalQuestions: number
-  createdAt: string
-  updatedAt: string
-  totalAttempts: number
-  highestScore: number
-  latestScore: number | null
-  lastAttemptDate: string | null
-  folderId: string | null
+  id: string;
+  title: string;
+  description: string | null;
+  totalQuestions: number;
+  createdAt: string;
+  updatedAt: string;
+  totalAttempts: number;
+  highestScore: number;
+  latestScore: number | null;
+  lastAttemptDate: string | null;
+  folderId: string | null;
   folder: {
-    id: string
-    name: string
-    isDefault: boolean
-  } | null
+    id: string;
+    name: string;
+    isDefault: boolean;
+  } | null;
 }
 
 interface PublishedTest {
-  id: string
-  title: string
-  description: string | null
-  timeLimit: number | null
-  passingPercentage: number
+  id: string;
+  title: string;
+  description: string | null;
+  timeLimit: number | null;
+  passingPercentage: number;
   createdBy: {
-    name: string | null
-    email: string
-  }
-  publishedAt: string
-  totalQuestions: number
-  hasAttempted: boolean
+    name: string | null;
+    email: string;
+  };
+  publishedAt: string;
+  totalQuestions: number;
+  hasAttempted: boolean;
   attempt: {
-    id: string
-    score: number | null
-    isCompleted: boolean
-    completedAt: string | null
-    createdAt: string
-  } | null
-  canTakeTest: boolean
-  isSaved: boolean
+    id: string;
+    score: number | null;
+    isCompleted: boolean;
+    completedAt: string | null;
+    createdAt: string;
+  } | null;
+  canTakeTest: boolean;
+  isSaved: boolean;
 }
 
 interface Folder {
-  id: string
-  name: string
-  isDefault: boolean
+  id: string;
+  name: string;
+  isDefault: boolean;
 }
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [quizHistory, setQuizHistory] = useState<QuizHistory[]>([])
-  const [folders, setFolders] = useState<Folder[]>([])
-  const [filteredQuizzes, setFilteredQuizzes] = useState<QuizHistory[]>([])
-  const [publishedTests, setPublishedTests] = useState<PublishedTest[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [quizHistory, setQuizHistory] = useState<QuizHistory[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [filteredQuizzes, setFilteredQuizzes] = useState<QuizHistory[]>([]);
+  const [publishedTests, setPublishedTests] = useState<PublishedTest[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (session?.user) {
-      fetchQuizHistory()
-      fetchPublishedTests()
+      fetchQuizHistory();
+      fetchPublishedTests();
     }
-  }, [session])
+  }, [session]);
 
   useEffect(() => {
     if (searchQuery.trim() === "" && selectedFolder === null) {
-      setFilteredQuizzes(quizHistory)
+      setFilteredQuizzes(quizHistory);
     } else {
-      let filtered = quizHistory
-      
+      let filtered = quizHistory;
+
       // Filter by search query
       if (searchQuery.trim() !== "") {
-        filtered = filtered.filter(quiz =>
-          quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (quiz.description && quiz.description.toLowerCase().includes(searchQuery.toLowerCase()))
-        )
+        filtered = filtered.filter(
+          (quiz) =>
+            quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (quiz.description &&
+              quiz.description
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()))
+        );
       }
-      
+
       // Filter by folder
       if (selectedFolder !== null) {
         if (selectedFolder === "uncategorized") {
           // Show quizzes that are truly uncategorized (folderId is null) OR
           // quizzes that are in any folder named "Uncategorized"
-          filtered = filtered.filter(quiz => 
-            !quiz.folderId || 
-            (quiz.folder && quiz.folder.name.toLowerCase() === "uncategorized")
-          )
+          filtered = filtered.filter(
+            (quiz) =>
+              !quiz.folderId ||
+              (quiz.folder &&
+                quiz.folder.name.toLowerCase() === "uncategorized")
+          );
         } else {
-          filtered = filtered.filter(quiz => quiz.folderId === selectedFolder)
+          filtered = filtered.filter(
+            (quiz) => quiz.folderId === selectedFolder
+          );
         }
       }
-      
-      setFilteredQuizzes(filtered)
+
+      setFilteredQuizzes(filtered);
     }
-  }, [searchQuery, quizHistory, selectedFolder])
+  }, [searchQuery, quizHistory, selectedFolder]);
 
   const fetchQuizHistory = async () => {
     try {
-      const response = await fetch("/api/quiz/history")
+      const response = await fetch("/api/quiz/history");
       if (response.ok) {
-        const data = await response.json()
-        setQuizHistory(data.quizzes)
-        setFilteredQuizzes(data.quizzes)
-        setFolders(data.folders)
+        const data = await response.json();
+        setQuizHistory(data.quizzes);
+        setFilteredQuizzes(data.quizzes);
+        setFolders(data.folders);
       }
     } catch (error) {
-      console.error("Error fetching quiz history:", error)
+      console.error("Error fetching quiz history:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const fetchPublishedTests = async () => {
     try {
-      const response = await fetch("/api/published-tests")
+      const response = await fetch("/api/published-tests");
       if (response.ok) {
-        const data = await response.json()
-        setPublishedTests(data.publishedTests)
+        const data = await response.json();
+        setPublishedTests(data.publishedTests);
       }
     } catch (error) {
-      console.error("Error fetching published tests:", error)
+      console.error("Error fetching published tests:", error);
     }
-  }
+  };
 
   const handleRetakeQuiz = async (quizId: string) => {
     try {
-      const response = await fetch(`/api/quiz/${quizId}`)
+      const response = await fetch(`/api/quiz/${quizId}`);
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         // Navigate to quiz page with questions
-        router.push(`/quiz/${quizId}`)
+        router.push(`/quiz/${quizId}`);
       }
     } catch (error) {
-      console.error("Error loading quiz:", error)
+      console.error("Error loading quiz:", error);
     }
-  }
+  };
 
   const handleTakePublishedTest = (testId: string) => {
-    router.push(`/published-test/${testId}`)
-  }
+    router.push(`/published-test/${testId}`);
+  };
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     try {
       const response = await fetch(`/api/folders/${folderId}`, {
         method: "DELETE",
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        toast.success(`Folder "${folderName}" deleted successfully!`)
-        setFolders(folders.filter(folder => folder.id !== folderId))
-        
+        toast.success(`Folder "${folderName}" deleted successfully!`);
+        setFolders(folders.filter((folder) => folder.id !== folderId));
+
         // If the deleted folder was selected, reset to all quizzes
         if (selectedFolder === folderId) {
-          setSelectedFolder(null)
+          setSelectedFolder(null);
         }
-        
+
         // Refresh quiz list to move quizzes to uncategorized
-        fetchQuizHistory()
+        fetchQuizHistory();
       } else {
-        toast.error(data.error || "Failed to delete folder")
+        toast.error(data.error || "Failed to delete folder");
       }
     } catch (error) {
-      toast.error("An error occurred while deleting the folder")
+      toast.error("An error occurred while deleting the folder");
     }
-  }
+  };
 
   if (status === "loading" || isLoading) {
     return (
       <div className="container mx-auto p-4 md:p-8 max-w-4xl">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-lg">Loading...</div>
+          <LoadingSpinner size="lg" text="Loading your dashboard..." />
         </div>
       </div>
-    )
+    );
   }
 
   if (!session) {
@@ -205,15 +220,20 @@ export default function DashboardPage() {
             </div>
             <h1 className="text-3xl font-bold">Access Denied</h1>
             <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Please sign in to access your personalized dashboard and track your quiz progress.
+              Please sign in to access your personalized dashboard and track
+              your quiz progress.
             </p>
           </div>
-          <Button onClick={() => router.push("/login")} size="lg" className="rounded-xl">
+          <Button
+            onClick={() => router.push("/login")}
+            size="lg"
+            className="rounded-xl"
+          >
             Sign In to Continue
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -228,7 +248,11 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Welcome back, <span className="font-semibold text-foreground">{session.user?.name}</span>! Here's your quiz activity overview and achievements.
+            Welcome back,{" "}
+            <span className="font-semibold text-foreground">
+              {session.user?.name}
+            </span>
+            ! Here's your quiz activity overview and achievements.
           </p>
         </div>
 
@@ -249,13 +273,15 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Button 
-                onClick={() => router.push("/")} 
+              <Button
+                onClick={() => router.push("/")}
                 size="lg"
                 className="w-full rounded-xl text-base font-semibold py-4 group"
               >
                 Start New Quiz
-                <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200">🚀</span>
+                <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200">
+                  🚀
+                </span>
               </Button>
             </CardContent>
           </Card>
@@ -274,11 +300,15 @@ export default function DashboardPage() {
                         Published Tests
                       </CardTitle>
                       <CardDescription className="text-base">
-                        Instructor-created tests for assessment (single attempt only)
+                        Instructor-created tests for assessment (single attempt
+                        only)
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 px-3 py-1">
+                  <Badge
+                    variant="outline"
+                    className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 px-3 py-1"
+                  >
                     Assessment Mode
                   </Badge>
                 </div>
@@ -302,13 +332,17 @@ export default function DashboardPage() {
                       Practice Quizzes
                     </CardTitle>
                     <CardDescription className="text-base">
-                      Your personal quizzes and performance history (unlimited attempts)
+                      Your personal quizzes and performance history (unlimited
+                      attempts)
                     </CardDescription>
                   </div>
                 </div>
-                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3 py-1">
-                      Practice Mode
-                  </Badge>
+                <Badge
+                  variant="outline"
+                  className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3 py-1"
+                >
+                  Practice Mode
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -321,7 +355,7 @@ export default function DashboardPage() {
                   onFolderSelect={setSelectedFolder}
                   onFoldersChange={setFolders}
                 />
-                
+
                 {/* Search */}
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -333,7 +367,7 @@ export default function DashboardPage() {
                   />
                 </div>
               </div>
-              
+
               {quizHistory.length === 0 ? (
                 <div className="text-center py-12 space-y-4">
                   <div className="w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mx-auto">
@@ -341,7 +375,9 @@ export default function DashboardPage() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-lg font-medium">No saved quizzes yet</p>
-                    <p className="text-muted-foreground">Save your first quiz to see results and analytics here.</p>
+                    <p className="text-muted-foreground">
+                      Save your first quiz to see results and analytics here.
+                    </p>
                   </div>
                 </div>
               ) : filteredQuizzes.length === 0 ? (
@@ -350,8 +386,12 @@ export default function DashboardPage() {
                     🔍
                   </div>
                   <div className="space-y-2">
-                    <p className="text-lg font-medium">No quizzes match your search</p>
-                    <p className="text-muted-foreground">Try a different search term or browse all quizzes.</p>
+                    <p className="text-lg font-medium">
+                      No quizzes match your search
+                    </p>
+                    <p className="text-muted-foreground">
+                      Try a different search term or browse all quizzes.
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -378,11 +418,15 @@ export default function DashboardPage() {
             <CardContent>
               <div className="grid gap-4">
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-                  <span className="font-medium text-muted-foreground">Name</span>
+                  <span className="font-medium text-muted-foreground">
+                    Name
+                  </span>
                   <span className="font-semibold">{session.user?.name}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-                  <span className="font-medium text-muted-foreground">Email</span>
+                  <span className="font-medium text-muted-foreground">
+                    Email
+                  </span>
                   <span className="font-semibold">{session.user?.email}</span>
                 </div>
               </div>
@@ -391,5 +435,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

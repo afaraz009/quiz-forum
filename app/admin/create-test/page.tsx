@@ -1,23 +1,24 @@
-"use client"
+"use client";
 
-import { useSession } from "next-auth/react"
-import { redirect } from "next/navigation"
-import { TestCreator } from "@/components/admin/test-creator"
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { TestCreator } from "@/components/admin/test-creator";
+import { LoadingPage } from "@/components/ui/loading-spinner";
 
 export default function CreateTestPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div>Loading...</div>
+    return <LoadingPage />;
   }
 
   if (!session) {
-    redirect("/login")
+    redirect("/login");
   }
 
   if (!session.user.isAdmin) {
-    redirect("/dashboard")
+    redirect("/dashboard");
   }
 
-  return <TestCreator />
+  return <TestCreator />;
 }

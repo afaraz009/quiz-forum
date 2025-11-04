@@ -1,5 +1,5 @@
-import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
@@ -8,29 +8,25 @@ export default withAuth(
       // Check if user is admin
       if (!req.nextauth.token?.isAdmin) {
         // Redirect non-admin users to dashboard
-        return NextResponse.redirect(new URL("/dashboard", req.url))
+        return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
-    return NextResponse.next()
+    return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
         // Allow access to admin routes only for admin users
         if (req.nextUrl.pathname.startsWith("/admin")) {
-          return token?.isAdmin === true
+          return token?.isAdmin === true;
         }
         // For all other protected routes, just check if user is authenticated
-        return !!token
+        return !!token;
       },
     },
   }
-)
+);
 
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/dashboard/:path*",
-    "/quiz/:path*"
-  ]
-}
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/quiz/:path*"],
+};
