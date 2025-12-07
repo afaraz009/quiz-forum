@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client"
-
 // We'll need to simulate the JWT token creation to see what's being stored
-const prisma = new PrismaClient()
+import { prisma } from "../lib/prisma"
 
 async function testSession() {
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 // Debug DATABASE_URL
@@ -13,8 +13,6 @@ if (!process.env.DATABASE_URL) {
 if (!process.env.DATABASE_URL.startsWith('postgresql://') && !process.env.DATABASE_URL.startsWith('postgres://')) {
   throw new Error(`DATABASE_URL must start with postgresql:// or postgres://, got: ${process.env.DATABASE_URL.substring(0, 20)}...`)
 }
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {

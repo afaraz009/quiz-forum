@@ -1,5 +1,6 @@
+// Note: This file uses CommonJS. For production, consider converting to ES modules
+// For now, we'll keep the direct instantiation since require() doesn't work well with singleton pattern
 const { PrismaClient } = require('@prisma/client');
-
 const prisma = new PrismaClient();
 
 async function listUsers() {
