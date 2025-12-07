@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Import Fira Code font for better code rendering */
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap");
 
 @layer utilities {
   .text-balance {
@@ -47,13 +47,16 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 93%;
     --sidebar-ring: 214 100% 59%;
-    
+
     /* Enhanced shadow variables */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
@@ -90,13 +93,16 @@
     --sidebar-accent-foreground: 0 0% 97%; /* #F7F7F7 - Brighter text */
     --sidebar-border: 0 0% 22%; /* #383838 - Enhanced borders */
     --sidebar-ring: 214 100% 59%; /* #3B82F6 - Interactive Accent */
-    
+
     /* Enhanced dark shadow variables */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.15);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3),
+      0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2),
+      0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15),
+      0 8px 10px -6px rgb(0 0 0 / 0.15);
   }
 }
 
@@ -107,7 +113,8 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
     font-weight: 400;
     line-height: 1.6;
     letter-spacing: -0.01em;
@@ -117,7 +124,12 @@
   }
 
   /* Enhanced typography system */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.025em;
@@ -143,11 +155,6 @@
   p {
     line-height: 1.7;
     color: hsl(var(--foreground) / 0.9);
-  }
-
-  /* Enhanced smooth transitions */
-  * {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Modern focus styles */
@@ -199,29 +206,58 @@
     border: 1px solid hsl(var(--border) / 0.5);
   }
 
-
-
   /* Enhanced gradient utilities */
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--primary) / 0.8)
+    );
   }
 
   .gradient-card {
-    background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted) / 0.3));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card)),
+      hsl(var(--muted) / 0.3)
+    );
   }
 
   .gradient-bg {
-    background: radial-gradient(ellipse at top, hsl(var(--primary) / 0.05) 0%, transparent 60%),
-                radial-gradient(ellipse at bottom, hsl(var(--accent) / 0.05) 0%, transparent 60%);
+    background: radial-gradient(
+        ellipse at top,
+        hsl(var(--primary) / 0.05) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse at bottom,
+        hsl(var(--accent) / 0.05) 0%,
+        transparent 60%
+      );
   }
 
   /* Floating background elements */
   .bg-pattern {
-    background-image: 
-      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.06) 0%, transparent 50%),
-      radial-gradient(circle at 75% 25%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
-      radial-gradient(circle at 25% 75%, hsl(var(--accent) / 0.04) 0%, transparent 50%);
+    background-image: radial-gradient(
+        circle at 25% 25%,
+        hsl(var(--primary) / 0.08) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 75%,
+        hsl(var(--accent) / 0.06) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 25%,
+        hsl(var(--primary) / 0.04) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 25% 75%,
+        hsl(var(--accent) / 0.04) 0%,
+        transparent 50%
+      );
   }
 
   /* Animation utilities */
@@ -270,7 +306,8 @@
 
   /* Floating animation for hero elements */
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -314,11 +351,6 @@
 
   /* Code block styling */
   code {
-    font-family: 'Fira Code', monospace;
-  }
-
-  /* Code block styling */
-  code {
-    font-family: 'Fira Code', monospace;
+    font-family: "Fira Code", monospace;
   }
 }

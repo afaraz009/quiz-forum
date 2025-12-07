@@ -1,8 +1,10 @@
 /* Custom dropdown animations to fix origin point issues */
+
+/* Entry animations */
 @keyframes slideDownAndFade {
   from {
     opacity: 0;
-    transform: translateY(-0.25rem);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -13,7 +15,7 @@
 @keyframes slideUpAndFade {
   from {
     opacity: 0;
-    transform: translateY(0.25rem);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -24,7 +26,7 @@
 @keyframes slideRightAndFade {
   from {
     opacity: 0;
-    transform: translateX(-0.25rem);
+    transform: translateX(-8px);
   }
   to {
     opacity: 1;
@@ -35,7 +37,7 @@
 @keyframes slideLeftAndFade {
   from {
     opacity: 0;
-    transform: translateX(0.25rem);
+    transform: translateX(8px);
   }
   to {
     opacity: 1;
@@ -43,30 +45,99 @@
   }
 }
 
-/* Override Radix UI animations with custom ones */
+/* Exit animations */
+@keyframes slideDownAndFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slideUpAndFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes slideRightAndFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes slideLeftAndFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+
+/* Base dropdown styles */
+.radix-dropdown {
+  display: block !important;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+/* Open state animations */
 .radix-dropdown[data-state="open"] {
-  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
-  animation-duration: 0.15s !important;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
 }
 
 .radix-dropdown[data-side="top"][data-state="open"] {
-  animation-name: slideDownAndFade !important;
+  animation-name: slideDownAndFade;
 }
 
 .radix-dropdown[data-side="bottom"][data-state="open"] {
-  animation-name: slideUpAndFade !important;
+  animation-name: slideUpAndFade;
 }
 
 .radix-dropdown[data-side="left"][data-state="open"] {
-  animation-name: slideRightAndFade !important;
+  animation-name: slideRightAndFade;
 }
 
 .radix-dropdown[data-side="right"][data-state="open"] {
-  animation-name: slideLeftAndFade !important;
+  animation-name: slideLeftAndFade;
 }
 
-/* Ensure proper display */
-.radix-dropdown {
-  display: block !important;
+/* Closed state animations */
+.radix-dropdown[data-state="closed"] {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+}
+
+.radix-dropdown[data-side="top"][data-state="closed"] {
+  animation-name: slideDownAndFadeOut;
+}
+
+.radix-dropdown[data-side="bottom"][data-state="closed"] {
+  animation-name: slideUpAndFadeOut;
+}
+
+.radix-dropdown[data-side="left"][data-state="closed"] {
+  animation-name: slideRightAndFadeOut;
+}
+
+.radix-dropdown[data-side="right"][data-state="closed"] {
+  animation-name: slideLeftAndFadeOut;
 }
