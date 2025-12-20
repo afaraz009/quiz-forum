@@ -101,6 +101,45 @@ export function UserNav() {
               </div>
             </a>
           </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
+            <a href="/translation-practice" className="w-full flex items-center gap-3">
+              <span className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                🌐
+              </span>
+              <div className="flex flex-col">
+                <span className="font-medium">Translation Practice</span>
+                <span className="text-xs text-muted-foreground">
+                  English-Urdu AI practice
+                </span>
+              </div>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
+            <a href="/translation-practice/history" className="w-full flex items-center gap-3">
+              <span className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                📜
+              </span>
+              <div className="flex flex-col">
+                <span className="font-medium">Translation History</span>
+                <span className="text-xs text-muted-foreground">
+                  View past sessions
+                </span>
+              </div>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
+            <a href="/settings" className="w-full flex items-center gap-3">
+              <span className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                ⚙️
+              </span>
+              <div className="flex flex-col">
+                <span className="font-medium">Settings</span>
+                <span className="text-xs text-muted-foreground">
+                  Configure your account
+                </span>
+              </div>
+            </a>
+          </DropdownMenuItem>
           <DropdownMenuSeparator className="my-2" />
           <DropdownMenuItem
             className="cursor-pointer rounded-lg p-3 focus:bg-destructive/10 focus:text-destructive transition-colors duration-200"
