@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getFeedback } from '@/lib/gemini-client';
 import { parseFeedbackResponse } from '@/lib/parse-gemini-feedback';
-import { decrypt } from '@/lib/crypto';
+import { decryptApiKey } from '@/lib/crypto';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     // Decrypt API key
-    const apiKey = decrypt(user.geminiApiKey);
+    const apiKey = decryptApiKey(user.geminiApiKey);
 
     // Get AI feedback
     const feedbackText = await getFeedback(

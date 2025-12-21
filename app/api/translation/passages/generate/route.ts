@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { generateUrduParagraph } from '@/lib/gemini-client';
-import { decrypt } from '@/lib/crypto';
+import { decryptApiKey } from '@/lib/crypto';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     const { difficultyLevel } = generateSchema.parse(body);
 
     // Decrypt API key
-    const apiKey = decrypt(user.geminiApiKey);
+    const apiKey = decryptApiKey(user.geminiApiKey);
 
     // Generate Urdu paragraph
     const urduParagraph = await generateUrduParagraph(apiKey, difficultyLevel);
