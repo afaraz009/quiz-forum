@@ -5,7 +5,7 @@ import { getFeedback } from '@/lib/gemini-client';
 import { parseFeedbackResponse } from '@/lib/parse-gemini-feedback';
 import { decryptApiKey } from '@/lib/crypto';
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 const submitSchema = z.object({
   passageId: z.string(),

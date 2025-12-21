@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { generateUrduParagraph } from '@/lib/gemini-client';
 import { decryptApiKey } from '@/lib/crypto';
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 const generateSchema = z.object({
   difficultyLevel: z.number().int().min(1).max(3),

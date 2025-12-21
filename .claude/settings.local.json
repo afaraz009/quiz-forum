@@ -1,13 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git merge:*)",
-      "Skill(superpowers:brainstorming)"
+
     ],
     "deny": [],
     "ask": []
-  },
-  "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true
   }
 }
