@@ -23,6 +23,7 @@ export default function VocabularyPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [entries, setEntries] = useState<VocabularyEntry[]>([])
+  const [totalEntries, setTotalEntries] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [showUploader, setShowUploader] = useState(false)
   const { toast } = useToast()
@@ -41,6 +42,7 @@ export default function VocabularyPage() {
       if (response.ok) {
         const data = await response.json()
         setEntries(data.entries)
+        setTotalEntries(data.total) // Get the actual total from API
       }
     } catch (error) {
       console.error("Error fetching vocabulary entries:", error)
@@ -153,7 +155,7 @@ export default function VocabularyPage() {
                 variant="outline"
                 className="w-full"
                 size="lg"
-                disabled={entries.length === 0}
+                disabled={totalEntries === 0}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
@@ -162,7 +164,7 @@ export default function VocabularyPage() {
                 onClick={() => router.push("/vocabulary/generate-quiz")}
                 className="w-full"
                 size="lg"
-                disabled={entries.length < 4}
+                disabled={totalEntries < 4}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Generate Quiz
@@ -192,7 +194,7 @@ export default function VocabularyPage() {
         )}
 
         {/* Statistics Card */}
-        <VocabularyStatsCard totalEntries={entries.length} lastUpdated={lastUpdated} />
+        <VocabularyStatsCard totalEntries={totalEntries} lastUpdated={lastUpdated} />
 
         {/* Vocabulary List Card */}
         <Card className="shadow-lg hover:shadow-xl transition-all duration-300">
@@ -204,7 +206,7 @@ export default function VocabularyPage() {
               <div>
                 <CardTitle className="text-xl">Vocabulary Entries</CardTitle>
                 <CardDescription className="text-base">
-                  {entries.length} word{entries.length !== 1 ? "s" : ""} in your database
+                  {totalEntries} word{totalEntries !== 1 ? "s" : ""} in your database
                 </CardDescription>
               </div>
             </div>
