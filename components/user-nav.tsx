@@ -128,6 +128,32 @@ export function UserNav() {
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
+            <a href="/vocabulary" className="w-full flex items-center gap-3">
+              <span className="w-8 h-8 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center">
+                📚
+              </span>
+              <div className="flex flex-col">
+                <span className="font-medium">Vocabulary Library</span>
+                <span className="text-xs text-muted-foreground">
+                  Manage your vocabulary
+                </span>
+              </div>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
+            <a href="/vocabulary/generate-quiz" className="w-full flex items-center gap-3">
+              <span className="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
+                ✨
+              </span>
+              <div className="flex flex-col">
+                <span className="font-medium">Generate Vocab Quiz</span>
+                <span className="text-xs text-muted-foreground">
+                  Create practice quizzes
+                </span>
+              </div>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer rounded-lg p-3 focus:bg-primary/10 focus:text-primary transition-colors duration-200">
             <a href="/settings" className="w-full flex items-center gap-3">
               <span className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
                 ⚙️

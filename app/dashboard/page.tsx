@@ -20,6 +20,8 @@ import { EnhancedPracticeQuizzesTable } from "@/components/enhanced-practice-qui
 import { FolderFilter } from "@/components/folder-filter";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { VocabularyQuizHistoryTable } from "@/components/vocabulary-quiz-history-table";
+import type { VocabularyQuizHistory } from "@/types/vocabulary";
 
 interface QuizHistory {
   id: string;
@@ -77,6 +79,7 @@ export default function DashboardPage() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState<QuizHistory[]>([]);
   const [publishedTests, setPublishedTests] = useState<PublishedTest[]>([]);
+  const [vocabularyQuizHistory, setVocabularyQuizHistory] = useState<VocabularyQuizHistory[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +88,7 @@ export default function DashboardPage() {
     if (session?.user) {
       fetchQuizHistory();
       fetchPublishedTests();
+      fetchVocabularyQuizHistory();
     }
   }, [session]);
 
@@ -153,6 +157,18 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error("Error fetching published tests:", error);
+    }
+  };
+
+  const fetchVocabularyQuizHistory = async () => {
+    try {
+      const response = await fetch("/api/vocabulary-quiz/history");
+      if (response.ok) {
+        const data = await response.json();
+        setVocabularyQuizHistory(data.quizzes);
+      }
+    } catch (error) {
+      console.error("Error fetching vocabulary quiz history:", error);
     }
   };
 
@@ -315,6 +331,41 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <PublishedTestsTable tests={publishedTests} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Vocabulary Quizzes Section */}
+          {vocabularyQuizHistory.length > 0 && (
+            <Card className="shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl flex items-center justify-center">
+                      📚
+                    </div>
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        Vocabulary Quizzes
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Practice quizzes generated from your vocabulary database
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800 px-3 py-1"
+                  >
+                    Vocabulary
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <VocabularyQuizHistoryTable
+                  quizzes={vocabularyQuizHistory}
+                  onQuizzesChange={fetchVocabularyQuizHistory}
+                />
               </CardContent>
             </Card>
           )}

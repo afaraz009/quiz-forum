@@ -8,6 +8,7 @@ Your context window will be automatically compacted as it approaches its limit, 
 ## Project Overview
 
 This is a Next.js quiz application with dual-mode functionality: **Practice Mode** for students and **Assessment Mode** for instructors. Students can upload JSON files or paste JSON content to create practice quizzes with both multiple-choice questions (MCQs) with exactly 4 options and short-answer text questions. Instructors (users with `isAdmin: true`) can create and publish formal tests that students can attempt only once. The app includes user authentication via NextAuth, quiz/test persistence, attempt tracking, and folder organization for practice quizzes.
+This is an inhouse application I built specifically for my 20 students to help them learn, specifically english 
 
 ## Development Commands
 
@@ -96,9 +97,10 @@ Questions must follow this structure:
     "correctAnswer": "Correct answer"
   }
 ]
+```
 
-- MCQ questions require exactly 4 options
-- Text questions omit the options field
+- MCQ questions can contain any number of options
+- If the option array is empty or missing the question becomes a text question
 - correctAnswer must be included in options array for MCQs
 
 ## Database Schema
