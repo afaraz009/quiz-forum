@@ -59,36 +59,38 @@ export function parseVocabularyCSV(content: string): Omit<VocabularyEntry, 'id' 
 /**
  * Parse a single CSV line respecting quoted fields
  * Handles both comma and semicolon delimiters
+ * Properly handles fields enclosed in double quotes
  */
 function parseCSVLine(line: string): string[] {
   const fields: string[] = []
   let currentField = ''
   let inQuotes = false
-  let delimiter = line.includes(';') ? ';' : ','
+  let delimiter = ','
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i]
 
     if (char === '"') {
       if (inQuotes && line[i + 1] === '"') {
-        // Escaped quote
+        // Escaped quote (two consecutive quotes "" inside a quoted field)
         currentField += '"'
         i++
       } else {
-        // Toggle quote state
+        // Toggle quote state (entering or exiting quoted field)
         inQuotes = !inQuotes
       }
     } else if (char === delimiter && !inQuotes) {
-      // Field separator
-      fields.push(currentField)
+      // Field separator found outside quotes
+      fields.push(currentField.trim())
       currentField = ''
     } else {
+      // Regular character - add to current field
       currentField += char
     }
   }
 
   // Add the last field
-  fields.push(currentField)
+  fields.push(currentField.trim())
 
   return fields
 }
