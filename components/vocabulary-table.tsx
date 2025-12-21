@@ -199,6 +199,7 @@ export function VocabularyTable({ entries, onEntriesChange }: VocabularyTablePro
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-16">#</TableHead>
                   <TableHead
                     className="cursor-pointer"
                     onClick={() => handleSort("word")}
@@ -239,8 +240,11 @@ export function VocabularyTable({ entries, onEntriesChange }: VocabularyTablePro
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedEntries.map((entry) => (
+                {paginatedEntries.map((entry, index) => (
                   <TableRow key={entry.id}>
+                    <TableCell className="text-muted-foreground">
+                      {(currentPage - 1) * entriesPerPage + index + 1}
+                    </TableCell>
                     <TableCell className="font-medium">{entry.word}</TableCell>
                     <TableCell className="max-w-xs">
                       <div className="truncate">{entry.meaning}</div>

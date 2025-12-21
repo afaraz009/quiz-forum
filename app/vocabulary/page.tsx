@@ -38,7 +38,8 @@ export default function VocabularyPage() {
 
   const fetchVocabularyEntries = async () => {
     try {
-      const response = await fetch("/api/vocabulary")
+      // Fetch all entries by setting a high limit
+      const response = await fetch("/api/vocabulary?limit=10000")
       if (response.ok) {
         const data = await response.json()
         setEntries(data.entries)
