@@ -15,18 +15,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eye, Calendar, Trophy, BookOpen, TrendingUp } from 'lucide-react';
+import { Eye, BookOpen, TrendingUp, Trophy, Languages } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
-interface Session {
+interface Passage {
   id: string;
+  urduParagraph: string;
   difficultyLevel: number;
-  startedAt: string;
-  endedAt: string | null;
-  averageScore: number | null;
-  totalParagraphs: number;
-  isActive: boolean;
+  createdAt: string;
+  totalAttempts: number;
+  highestScore: number | null;
+  recentScore: number | null;
+  lastAttemptedAt: string | null;
 }
 
 const DIFFICULTY_LABELS: Record<number, string> = {
@@ -44,11 +45,12 @@ const DIFFICULTY_COLORS: Record<number, string> = {
 export default function TranslationHistoryPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [passages, setPassages] = useState<Passage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [stats, setStats] = useState({
-    totalSessions: 0,
-    totalParagraphs: 0,
+    totalPassages: 0,
+    totalAttempts: 0,
     overallAverage: 0,
   });
 
@@ -56,45 +58,46 @@ export default function TranslationHistoryPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      fetchSessions();
+      fetchPassages();
     }
-  }, [status, router]);
+  }, [status, router, difficultyFilter]);
 
-  const fetchSessions = async () => {
+  const fetchPassages = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/translation/sessions?limit=100');
+      const params = new URLSearchParams({ limit: '100' });
+      if (difficultyFilter) {
+        params.append('difficulty', difficultyFilter);
+      }
+
+      const res = await fetch(`/api/translation/passages?${params}`);
       if (res.ok) {
         const data = await res.json();
-        setSessions(data.sessions);
+        setPassages(data.passages);
 
         // Calculate stats
-        const completedSessions = data.sessions.filter((s: Session) => !s.isActive);
-        const totalParagraphs = completedSessions.reduce((sum: number, s: Session) => sum + s.totalParagraphs, 0);
-        const sessionsWithScores = completedSessions.filter((s: Session) => s.averageScore !== null);
-        const overallAverage = sessionsWithScores.length > 0
-          ? sessionsWithScores.reduce((sum: number, s: Session) => sum + (s.averageScore || 0), 0) / sessionsWithScores.length
+        const totalAttempts = data.passages.reduce((sum: number, p: Passage) => sum + p.totalAttempts, 0);
+        const passagesWithScores = data.passages.filter((p: Passage) => p.highestScore !== null);
+        const overallAverage = passagesWithScores.length > 0
+          ? passagesWithScores.reduce((sum: number, p: Passage) => sum + (p.highestScore || 0), 0) / passagesWithScores.length
           : 0;
 
         setStats({
-          totalSessions: completedSessions.length,
-          totalParagraphs,
+          totalPassages: data.passages.length,
+          totalAttempts,
           overallAverage,
         });
       }
     } catch (error) {
-      console.error('Failed to fetch sessions:', error);
+      console.error('Failed to fetch passages:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getDuration = (startedAt: string, endedAt: string | null) => {
-    if (!endedAt) return 'In progress';
-    const start = new Date(startedAt);
-    const end = new Date(endedAt);
-    const minutes = Math.floor((end.getTime() - start.getTime()) / 1000 / 60);
-    return `${minutes} min`;
+  const truncateUrdu = (text: string, maxLength: number = 50) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   };
 
   if (status === 'loading' || isLoading) {
@@ -117,11 +120,11 @@ export default function TranslationHistoryPage() {
         <div>
           <h1 className="text-3xl font-bold">Translation Practice History</h1>
           <p className="text-muted-foreground mt-2">
-            View all your past translation practice sessions
+            View all your translation passages and practice attempts
           </p>
         </div>
         <Button asChild>
-          <Link href="/translation-practice">New Practice Session</Link>
+          <Link href="/translation-practice">New Practice</Link>
         </Button>
       </div>
 
@@ -131,10 +134,10 @@ export default function TranslationHistoryPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
-                <p className="text-3xl font-bold">{stats.totalSessions}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Passages</p>
+                <p className="text-3xl font-bold">{stats.totalPassages}</p>
               </div>
-              <Calendar className="h-8 w-8 text-muted-foreground" />
+              <Languages className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -143,8 +146,8 @@ export default function TranslationHistoryPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Paragraphs</p>
-                <p className="text-3xl font-bold">{stats.totalParagraphs}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Attempts</p>
+                <p className="text-3xl font-bold">{stats.totalAttempts}</p>
               </div>
               <BookOpen className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -155,7 +158,7 @@ export default function TranslationHistoryPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Overall Average</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Highest Score</p>
                 <p className="text-3xl font-bold">
                   {stats.overallAverage.toFixed(1)}
                   <span className="text-lg text-muted-foreground">/10</span>
@@ -167,21 +170,53 @@ export default function TranslationHistoryPage() {
         </Card>
       </div>
 
-      {/* Sessions Table */}
+      {/* Filter */}
+      <div className="mb-4 flex gap-2">
+        <Button
+          variant={difficultyFilter === '' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setDifficultyFilter('')}
+        >
+          All
+        </Button>
+        <Button
+          variant={difficultyFilter === '1' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setDifficultyFilter('1')}
+        >
+          Beginner
+        </Button>
+        <Button
+          variant={difficultyFilter === '2' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setDifficultyFilter('2')}
+        >
+          Intermediate
+        </Button>
+        <Button
+          variant={difficultyFilter === '3' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setDifficultyFilter('3')}
+        >
+          Advanced
+        </Button>
+      </div>
+
+      {/* Passages Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Practice Sessions</CardTitle>
+          <CardTitle>Translation Passages</CardTitle>
           <CardDescription>
-            Click on a session to view detailed feedback for each translation
+            Click on a passage to view all your attempts and retake it
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {sessions.length === 0 ? (
+          {passages.length === 0 ? (
             <div className="text-center py-12">
               <Trophy className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No sessions yet</h3>
+              <h3 className="text-lg font-semibold mb-2">No passages yet</h3>
               <p className="text-muted-foreground mb-4">
-                Start your first translation practice session to see your history here.
+                Start your first translation practice to see your history here.
               </p>
               <Button asChild>
                 <Link href="/translation-practice">Start Practicing</Link>
@@ -191,50 +226,54 @@ export default function TranslationHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Duration</TableHead>
+                  <TableHead>Passage Preview</TableHead>
                   <TableHead>Difficulty</TableHead>
-                  <TableHead className="text-center">Paragraphs</TableHead>
-                  <TableHead className="text-center">Avg Score</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-center">Attempts</TableHead>
+                  <TableHead className="text-center">Highest Score</TableHead>
+                  <TableHead className="text-center">Recent Score</TableHead>
+                  <TableHead>Last Attempted</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sessions.map((sessionItem) => (
-                  <TableRow key={sessionItem.id}>
-                    <TableCell>
-                      {format(new Date(sessionItem.startedAt), 'MMM dd, yyyy HH:mm')}
+                {passages.map((passage) => (
+                  <TableRow key={passage.id}>
+                    <TableCell className="max-w-xs">
+                      <div className="font-noto-nastaliq text-right" dir="rtl">
+                        {truncateUrdu(passage.urduParagraph)}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {getDuration(sessionItem.startedAt, sessionItem.endedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={DIFFICULTY_COLORS[sessionItem.difficultyLevel]}>
-                        {DIFFICULTY_LABELS[sessionItem.difficultyLevel]}
+                      <Badge className={DIFFICULTY_COLORS[passage.difficultyLevel]}>
+                        {DIFFICULTY_LABELS[passage.difficultyLevel]}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center font-medium">
-                      {sessionItem.totalParagraphs}
+                      {passage.totalAttempts}
                     </TableCell>
                     <TableCell className="text-center">
-                      {sessionItem.averageScore !== null ? (
+                      {passage.highestScore !== null ? (
+                        <span className="font-semibold text-green-600 dark:text-green-400">
+                          {passage.highestScore.toFixed(1)}/10
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {passage.recentScore !== null ? (
                         <span className="font-semibold">
-                          {sessionItem.averageScore.toFixed(1)}/10
+                          {passage.recentScore.toFixed(1)}/10
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {sessionItem.isActive ? (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30">
-                          Active
-                        </Badge>
+                      {passage.lastAttemptedAt ? (
+                        format(new Date(passage.lastAttemptedAt), 'MMM dd, yyyy')
                       ) : (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/30">
-                          Completed
-                        </Badge>
+                        <span className="text-muted-foreground">Never</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -243,9 +282,9 @@ export default function TranslationHistoryPage() {
                         size="sm"
                         asChild
                       >
-                        <Link href={`/translation-practice/history/${sessionItem.id}`}>
+                        <Link href={`/translation-practice/history/${passage.id}`}>
                           <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                          View
                         </Link>
                       </Button>
                     </TableCell>

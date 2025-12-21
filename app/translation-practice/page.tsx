@@ -2,40 +2,60 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { DifficultySelector } from '@/components/translation-practice/difficulty-selector';
 import { ParagraphDisplay } from '@/components/translation-practice/paragraph-display';
 import { TranslationInput } from '@/components/translation-practice/translation-input';
 import { FeedbackTable } from '@/components/translation-practice/feedback-table';
-import { SessionSummary } from '@/components/translation-practice/session-summary';
-import { SessionStatsHeader } from '@/components/translation-practice/session-stats-header';
 import { ApiKeySetupBanner } from '@/components/translation-practice/api-key-setup-banner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Award, TrendingUp, RefreshCw, History } from 'lucide-react';
 import type { FeedbackRow } from '@/lib/parse-gemini-feedback';
+import Link from 'next/link';
 
 type PracticeState = 'setup' | 'practice' | 'feedback';
 
-interface SessionData {
+interface PassageData {
   id: string;
+  urduParagraph: string;
   difficultyLevel: number;
-  totalParagraphs: number;
-  averageScore: number | null;
 }
 
 interface FeedbackData {
   feedback: FeedbackRow[];
   naturalVersion: string;
   score: number;
+  passageStats: {
+    highestScore: number;
+    recentScore: number;
+    totalAttempts: number;
+  };
 }
+
+const DIFFICULTY_LABELS: Record<number, string> = {
+  1: 'Beginner',
+  2: 'Intermediate',
+  3: 'Advanced',
+};
+
+const DIFFICULTY_COLORS: Record<number, string> = {
+  1: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  2: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  3: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+};
 
 export default function TranslationPracticePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const passageIdFromUrl = searchParams.get('passageId');
 
   const [state, setState] = useState<PracticeState>('setup');
-  const [sessionData, setSessionData] = useState<SessionData | null>(null);
-  const [currentParagraph, setCurrentParagraph] = useState('');
+  const [passageData, setPassageData] = useState<PassageData | null>(null);
   const [feedbackData, setFeedbackData] = useState<FeedbackData | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +74,13 @@ export default function TranslationPracticePage() {
     }
   }, [status]);
 
+  // Load existing passage if passageId is provided
+  useEffect(() => {
+    if (status === 'authenticated' && passageIdFromUrl) {
+      loadExistingPassage(passageIdFromUrl);
+    }
+  }, [status, passageIdFromUrl]);
+
   const checkApiKey = async () => {
     try {
       const res = await fetch('/api/settings/gemini-key');
@@ -64,10 +91,33 @@ export default function TranslationPracticePage() {
     }
   };
 
-  const startSession = async (difficultyLevel: number) => {
+  const loadExistingPassage = async (passageId: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/translation/session/start', {
+      const res = await fetch(`/api/translation/passages/${passageId}`);
+      if (!res.ok) {
+        throw new Error('Failed to load passage');
+      }
+
+      const data = await res.json();
+      setPassageData({
+        id: data.id,
+        urduParagraph: data.urduParagraph,
+        difficultyLevel: data.difficultyLevel,
+      });
+      setState('practice');
+    } catch (error) {
+      toast.error('Failed to load passage');
+      router.push('/translation-practice');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateNewPassage = async (difficultyLevel: number) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/translation/passages/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ difficultyLevel }),
@@ -75,61 +125,33 @@ export default function TranslationPracticePage() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to start session');
+        throw new Error(error.error || 'Failed to generate passage');
       }
 
       const data = await res.json();
-      setSessionData({
-        id: data.sessionId,
+      setPassageData({
+        id: data.passageId,
+        urduParagraph: data.urduParagraph,
         difficultyLevel: data.difficultyLevel,
-        totalParagraphs: 0,
-        averageScore: null,
       });
-
-      // Generate first paragraph
-      await generateParagraph(data.sessionId, difficultyLevel);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to start session');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const generateParagraph = async (sessionId: string, difficultyLevel: number) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/translation/generate-paragraph', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, difficultyLevel }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to generate paragraph');
-      }
-
-      const data = await res.json();
-      setCurrentParagraph(data.urduParagraph);
       setState('practice');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to generate paragraph');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate passage');
     } finally {
       setIsLoading(false);
     }
   };
 
   const submitTranslation = async (translation: string) => {
-    if (!sessionData) return;
+    if (!passageData) return;
 
     setIsLoading(true);
     try {
-      const res = await fetch('/api/translation/submit', {
+      const res = await fetch('/api/translation/passages/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: sessionData.id,
-          urduParagraph: currentParagraph,
+          passageId: passageData.id,
           userTranslation: translation,
         }),
       });
@@ -144,11 +166,7 @@ export default function TranslationPracticePage() {
         feedback: data.feedback,
         naturalVersion: data.naturalVersion,
         score: data.score,
-      });
-      setSessionData({
-        ...sessionData,
-        totalParagraphs: data.sessionStats.totalParagraphs,
-        averageScore: data.sessionStats.averageScore,
+        passageStats: data.passageStats,
       });
       setState('feedback');
       toast.success('Translation submitted!');
@@ -159,36 +177,31 @@ export default function TranslationPracticePage() {
     }
   };
 
-  const handleNext = async () => {
-    if (!sessionData) return;
-    await generateParagraph(sessionData.id, sessionData.difficultyLevel);
+  const handleRetake = () => {
+    setState('practice');
     setFeedbackData(null);
   };
 
-  const endSession = async () => {
-    if (!sessionData) return;
+  const handleNewPassage = async () => {
+    if (!passageData) return;
+    await generateNewPassage(passageData.difficultyLevel);
+    setFeedbackData(null);
+  };
 
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/translation/session/end', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sessionData.id }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to end session');
-      }
-
-      const data = await res.json();
-      toast.success(`Session ended! Average score: ${data.summary.averageScore?.toFixed(1) || 0}/10`);
-      router.push('/translation-practice/history');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to end session');
-    } finally {
-      setIsLoading(false);
+  const handleBackToSetup = () => {
+    setState('setup');
+    setPassageData(null);
+    setFeedbackData(null);
+    // Remove passageId from URL if present
+    if (passageIdFromUrl) {
+      router.push('/translation-practice');
     }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 8) return 'text-green-600 dark:text-green-400';
+    if (score >= 6) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   if (status === 'loading' || hasApiKey === null) {
@@ -202,44 +215,121 @@ export default function TranslationPracticePage() {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-6">English-Urdu Translation Practice</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Urdu-English Translation Practice</h1>
+        <Button variant="outline" asChild>
+          <Link href="/translation-practice/history">
+            <History className="mr-2 h-4 w-4" />
+            View History
+          </Link>
+        </Button>
+      </div>
 
       {!hasApiKey && <ApiKeySetupBanner />}
 
-      {sessionData && (
-        <SessionStatsHeader
-          totalParagraphs={sessionData.totalParagraphs}
-          difficultyLevel={sessionData.difficultyLevel}
-          averageScore={sessionData.averageScore}
-        />
+      {passageData && state !== 'setup' && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Badge className={DIFFICULTY_COLORS[passageData.difficultyLevel]}>
+              {DIFFICULTY_LABELS[passageData.difficultyLevel]}
+            </Badge>
+            <Button variant="ghost" size="sm" onClick={handleBackToSetup}>
+              Change Difficulty
+            </Button>
+          </div>
+        </div>
       )}
 
       {state === 'setup' && (
-        <DifficultySelector onStart={startSession} isLoading={isLoading} />
+        <DifficultySelector onStart={generateNewPassage} isLoading={isLoading} />
       )}
 
-      {state === 'practice' && (
+      {state === 'practice' && passageData && (
         <div className="space-y-6">
-          <ParagraphDisplay paragraph={currentParagraph} />
+          <ParagraphDisplay paragraph={passageData.urduParagraph} />
           <TranslationInput
             onSubmit={submitTranslation}
             isLoading={isLoading}
-            sessionId={sessionData?.id || ''}
+            sessionId={passageData.id}
           />
         </div>
       )}
 
-      {state === 'feedback' && feedbackData && (
+      {state === 'feedback' && feedbackData && passageData && (
         <div className="space-y-6">
-          <ParagraphDisplay paragraph={currentParagraph} />
+          <ParagraphDisplay paragraph={passageData.urduParagraph} />
+
+          {/* Stats Cards */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium text-muted-foreground">Current Score</p>
+                  </div>
+                  <p className={`text-2xl font-bold ${getScoreColor(feedbackData.score)}`}>
+                    {feedbackData.score.toFixed(1)}/10
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium text-muted-foreground">Highest Score</p>
+                  </div>
+                  <p className={`text-2xl font-bold ${getScoreColor(feedbackData.passageStats.highestScore)}`}>
+                    {feedbackData.passageStats.highestScore.toFixed(1)}/10
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium text-muted-foreground">Total Attempts</p>
+                  </div>
+                  <p className="text-2xl font-bold">{feedbackData.passageStats.totalAttempts}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <FeedbackTable feedback={feedbackData.feedback} />
-          <SessionSummary
-            naturalVersion={feedbackData.naturalVersion}
-            score={feedbackData.score}
-            onNext={handleNext}
-            onEndSession={endSession}
-            isLoading={isLoading}
-          />
+
+          {/* Natural Version */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Natural Translation</CardTitle>
+              <CardDescription>An ideal natural English translation</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-base leading-relaxed">{feedbackData.naturalVersion}</p>
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <Button onClick={handleRetake} variant="default">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Retake This Passage
+            </Button>
+            <Button onClick={handleNewPassage} variant="outline">
+              Generate New Passage
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href={`/translation-practice/history/${passageData.id}`}>
+                View All Attempts
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
     </div>
