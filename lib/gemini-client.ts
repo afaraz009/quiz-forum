@@ -110,7 +110,15 @@ export async function getFeedback(
 ): Promise<string> {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        temperature: 0.2, // Low temperature for consistent grading
+        topP: 0.8,       // Focused nucleus sampling
+        topK: 16,        // Strict word selection
+        maxOutputTokens: 2048,
+      }
+    });
 
     const prompt = `You are an English-Urdu translation expert. Analyze the following translation:
 
