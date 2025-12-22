@@ -39,11 +39,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
+      )
+    }
+
+    // Verify that the user exists in the database
+    const userExists = await prisma.user.findUnique({
+      where: {
+        id: session.user.id
+      }
+    })
+
+    if (!userExists) {
+      return NextResponse.json(
+        { error: "User not found. Please log in again." },
+        { status: 404 }
       )
     }
 
@@ -87,6 +101,15 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Create folder error:", error)
+
+    // Check if it's a foreign key constraint error
+    if (error instanceof Error && error.message.includes('Foreign key constraint')) {
+      return NextResponse.json(
+        { error: "User account not found. Please log out and log in again." },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
