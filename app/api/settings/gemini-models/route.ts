@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
 import { decryptApiKey } from '@/lib/crypto';
 
@@ -35,15 +34,24 @@ export async function GET(request: NextRequest) {
 
     // Decrypt the API key
     const apiKey = decryptApiKey(user.geminiApiKey);
-    const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Fetch available models
-    const models = await genAI.listModels();
+    // Fetch available models from Google AI API
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.statusText}`);
+    }
+
+    const data = await response.json();
 
     // Filter for generative models and format the response
-    const generativeModels = models
-      .filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
-      .map((model) => ({
+    const generativeModels = data.models
+      .filter((model: any) =>
+        model.supportedGenerationMethods?.includes('generateContent')
+      )
+      .map((model: any) => ({
         name: model.name.replace('models/', ''),
         displayName: model.displayName,
         description: model.description,
@@ -51,7 +59,7 @@ export async function GET(request: NextRequest) {
         outputTokenLimit: model.outputTokenLimit,
       }))
       // Sort by name to have consistent ordering
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         // Prioritize 2.0 models, then 1.5, then others
         const getVersion = (name: string) => {
           if (name.includes('2.0') || name.includes('2-')) return 3;
