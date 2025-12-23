@@ -28,11 +28,17 @@ export function parseFeedbackResponse(response: string): ParsedFeedback {
   let score = 0;
 
   try {
+    console.log('=== Parsing Gemini Feedback Response ===');
+    console.log('Response length:', response.length);
+    console.log('First 500 chars:', response.substring(0, 500));
+
     // Extract table rows
     const tableMatch = response.match(/\|.*\|[\s\S]*?\n\n/);
     if (tableMatch) {
+      console.log('✓ Found table match');
       const tableText = tableMatch[0];
       const lines = tableText.split('\n').filter(line => line.trim());
+      console.log(`Found ${lines.length} lines in table`);
 
       // Skip header and separator rows
       for (let i = 2; i < lines.length; i++) {
@@ -54,12 +60,18 @@ export function parseFeedbackResponse(response: string): ParsedFeedback {
           });
         }
       }
+      console.log(`✓ Parsed ${feedbackRows.length} feedback rows`);
+    } else {
+      console.warn('✗ No table match found in response');
     }
 
     // Extract natural version
     const naturalMatch = response.match(/##\s*Natural Version\s*\n+([\s\S]*?)(?=\n##|$)/i);
     if (naturalMatch) {
       naturalVersion = naturalMatch[1].trim();
+      console.log('✓ Found natural version:', naturalVersion.substring(0, 100));
+    } else {
+      console.warn('✗ No natural version found');
     }
 
     // Extract score
@@ -68,6 +80,9 @@ export function parseFeedbackResponse(response: string): ParsedFeedback {
       score = parseFloat(scoreMatch[1]);
       // Ensure score is between 0 and 10
       score = Math.max(0, Math.min(10, score));
+      console.log('✓ Found score:', score);
+    } else {
+      console.warn('✗ No score match found');
     }
 
     // Fallback: if no structured data found, try to extract score from anywhere in response
@@ -76,21 +91,37 @@ export function parseFeedbackResponse(response: string): ParsedFeedback {
       if (anyScoreMatch) {
         score = parseFloat(anyScoreMatch[1]);
         score = Math.max(0, Math.min(10, score));
+        console.log('✓ Found score via fallback:', score);
       }
     }
 
-    // If still no score, default to 5
+    // If still no score, default to 5 and log warning
     if (score === 0) {
+      console.warn('⚠ No score found, defaulting to 5. This may indicate the model did not follow the prompt format.');
+      console.log('Full response for debugging:', response);
       score = 5;
     }
 
-    return {
+    const result = {
       feedbackRows,
       naturalVersion: naturalVersion || 'Natural version not available.',
       score,
       rawResponse: response,
     };
+
+    console.log('=== Parsing Complete ===');
+    console.log('Summary:', {
+      feedbackRowsCount: feedbackRows.length,
+      hasNaturalVersion: !!naturalVersion,
+      score,
+    });
+
+    return result;
   } catch (error) {
+    console.error('=== Error Parsing Feedback ===');
+    console.error('Error:', error);
+    console.error('Response:', response);
+
     // If parsing fails, return basic structure with raw response
     return {
       feedbackRows: [],

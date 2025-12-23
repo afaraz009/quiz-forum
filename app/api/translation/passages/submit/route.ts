@@ -25,7 +25,15 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, geminiApiKey: true },
+      select: {
+        id: true,
+        geminiApiKey: true,
+        geminiModel: true,
+        geminiTemperature: true,
+        geminiTopP: true,
+        geminiTopK: true,
+        geminiMaxTokens: true,
+      },
     });
 
     if (!user) {
@@ -68,11 +76,21 @@ export async function POST(req: Request) {
     // Decrypt API key
     const apiKey = decryptApiKey(user.geminiApiKey);
 
+    // Prepare Gemini config
+    const geminiConfig = {
+      model: user.geminiModel || undefined,
+      temperature: user.geminiTemperature ?? undefined,
+      topP: user.geminiTopP ?? undefined,
+      topK: user.geminiTopK ?? undefined,
+      maxOutputTokens: user.geminiMaxTokens ?? undefined,
+    };
+
     // Get AI feedback
     const feedbackText = await getFeedback(
       apiKey,
       passage.urduParagraph,
-      userTranslation
+      userTranslation,
+      geminiConfig
     );
 
     // Parse feedback

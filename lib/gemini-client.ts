@@ -52,16 +52,33 @@ async function executeWithRetries<T>(
   throw lastError || new Error('Request failed after retries');
 }
 
+export interface GeminiConfig {
+  model?: string;
+  temperature?: number;
+  topP?: number;
+  topK?: number;
+  maxOutputTokens?: number;
+}
+
 /**
  * Generate an Urdu paragraph based on difficulty level
  */
 export async function generateUrduParagraph(
   apiKey: string,
-  difficultyLevel: 1 | 2 | 3
+  difficultyLevel: 1 | 2 | 3,
+  config?: GeminiConfig
 ): Promise<string> {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({
+      model: config?.model || 'gemini-2.0-flash-exp',
+      generationConfig: {
+        temperature: config?.temperature ?? 0.9,
+        topP: config?.topP ?? 0.95,
+        topK: config?.topK ?? 40,
+        maxOutputTokens: config?.maxOutputTokens ?? 2048,
+      }
+    });
 
     const difficultyText = DIFFICULTY_PROMPTS[difficultyLevel];
 
@@ -106,17 +123,18 @@ IMPORTANT: Return ONLY the Urdu text, no English translation, no explanations, n
 export async function getFeedback(
   apiKey: string,
   urduParagraph: string,
-  userTranslation: string
+  userTranslation: string,
+  config?: GeminiConfig
 ): Promise<string> {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
+    const model = genAI.getGenerativeModel({
+      model: config?.model || 'gemini-2.0-flash-exp',
       generationConfig: {
-        temperature: 0.2, // Low temperature for consistent grading
-        topP: 0.8,       // Focused nucleus sampling
-        topK: 16,        // Strict word selection
-        maxOutputTokens: 2048,
+        temperature: config?.temperature ?? 0.7,
+        topP: config?.topP ?? 0.95,
+        topK: config?.topK ?? 40,
+        maxOutputTokens: config?.maxOutputTokens ?? 2048,
       }
     });
 

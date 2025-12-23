@@ -23,11 +23,25 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { geminiApiKey: true },
+      select: {
+        geminiApiKey: true,
+        geminiModel: true,
+        geminiTemperature: true,
+        geminiTopP: true,
+        geminiTopK: true,
+        geminiMaxTokens: true,
+      },
     });
 
     return NextResponse.json({
       hasKey: !!user?.geminiApiKey,
+      settings: {
+        geminiModel: user?.geminiModel,
+        geminiTemperature: user?.geminiTemperature,
+        geminiTopP: user?.geminiTopP,
+        geminiTopK: user?.geminiTopK,
+        geminiMaxTokens: user?.geminiMaxTokens,
+      },
     });
   } catch (error) {
     console.error('Get Gemini key status error:', error);
@@ -64,7 +78,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { apiKey } = validation.data;
+    const { apiKey, geminiModel, geminiTemperature, geminiTopP, geminiTopK, geminiMaxTokens } = body;
 
     // Test the API key with Gemini
     const isValid = await testApiKey(apiKey);
@@ -78,9 +92,17 @@ export async function POST(request: NextRequest) {
     // Encrypt and save the API key
     const encryptedKey = encryptApiKey(apiKey);
 
+    // Prepare update data
+    const updateData: any = { geminiApiKey: encryptedKey };
+    if (geminiModel !== undefined) updateData.geminiModel = geminiModel;
+    if (geminiTemperature !== undefined) updateData.geminiTemperature = geminiTemperature;
+    if (geminiTopP !== undefined) updateData.geminiTopP = geminiTopP;
+    if (geminiTopK !== undefined) updateData.geminiTopK = geminiTopK;
+    if (geminiMaxTokens !== undefined) updateData.geminiMaxTokens = geminiMaxTokens;
+
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { geminiApiKey: encryptedKey },
+      data: updateData,
     });
 
     return NextResponse.json({
