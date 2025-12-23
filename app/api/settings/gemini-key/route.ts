@@ -25,22 +25,32 @@ export async function GET() {
       where: { id: session.user.id },
       select: {
         geminiApiKey: true,
-        geminiModel: true,
-        geminiTemperature: true,
-        geminiTopP: true,
-        geminiTopK: true,
-        geminiMaxTokens: true,
+        feedbackModel: true,
+        feedbackTemperature: true,
+        feedbackTopP: true,
+        feedbackTopK: true,
+        feedbackMaxTokens: true,
+        generationModel: true,
+        generationTemperature: true,
+        generationTopP: true,
+        generationTopK: true,
+        generationMaxTokens: true,
       },
     });
 
     return NextResponse.json({
       hasKey: !!user?.geminiApiKey,
       settings: {
-        geminiModel: user?.geminiModel,
-        geminiTemperature: user?.geminiTemperature,
-        geminiTopP: user?.geminiTopP,
-        geminiTopK: user?.geminiTopK,
-        geminiMaxTokens: user?.geminiMaxTokens,
+        feedbackModel: user?.feedbackModel,
+        feedbackTemperature: user?.feedbackTemperature,
+        feedbackTopP: user?.feedbackTopP,
+        feedbackTopK: user?.feedbackTopK,
+        feedbackMaxTokens: user?.feedbackMaxTokens,
+        generationModel: user?.generationModel,
+        generationTemperature: user?.generationTemperature,
+        generationTopP: user?.generationTopP,
+        generationTopK: user?.generationTopK,
+        generationMaxTokens: user?.generationMaxTokens,
       },
     });
   } catch (error) {
@@ -78,7 +88,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { apiKey, geminiModel, geminiTemperature, geminiTopP, geminiTopK, geminiMaxTokens } = body;
+    const {
+      apiKey,
+      feedbackModel,
+      feedbackTemperature,
+      feedbackTopP,
+      feedbackTopK,
+      feedbackMaxTokens,
+      generationModel,
+      generationTemperature,
+      generationTopP,
+      generationTopK,
+      generationMaxTokens,
+    } = body;
 
     // Test the API key with Gemini
     const isValid = await testApiKey(apiKey);
@@ -94,11 +116,20 @@ export async function POST(request: NextRequest) {
 
     // Prepare update data
     const updateData: any = { geminiApiKey: encryptedKey };
-    if (geminiModel !== undefined) updateData.geminiModel = geminiModel;
-    if (geminiTemperature !== undefined) updateData.geminiTemperature = geminiTemperature;
-    if (geminiTopP !== undefined) updateData.geminiTopP = geminiTopP;
-    if (geminiTopK !== undefined) updateData.geminiTopK = geminiTopK;
-    if (geminiMaxTokens !== undefined) updateData.geminiMaxTokens = geminiMaxTokens;
+
+    // Feedback settings
+    if (feedbackModel !== undefined) updateData.feedbackModel = feedbackModel;
+    if (feedbackTemperature !== undefined) updateData.feedbackTemperature = feedbackTemperature;
+    if (feedbackTopP !== undefined) updateData.feedbackTopP = feedbackTopP;
+    if (feedbackTopK !== undefined) updateData.feedbackTopK = feedbackTopK;
+    if (feedbackMaxTokens !== undefined) updateData.feedbackMaxTokens = feedbackMaxTokens;
+
+    // Generation settings
+    if (generationModel !== undefined) updateData.generationModel = generationModel;
+    if (generationTemperature !== undefined) updateData.generationTemperature = generationTemperature;
+    if (generationTopP !== undefined) updateData.generationTopP = generationTopP;
+    if (generationTopK !== undefined) updateData.generationTopK = generationTopK;
+    if (generationMaxTokens !== undefined) updateData.generationMaxTokens = generationMaxTokens;
 
     await prisma.user.update({
       where: { id: session.user.id },

@@ -60,16 +60,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's Gemini API key and settings
+    // Get user's Gemini API key and generation settings
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: {
         geminiApiKey: true,
-        geminiModel: true,
-        geminiTemperature: true,
-        geminiTopP: true,
-        geminiTopK: true,
-        geminiMaxTokens: true,
+        generationModel: true,
+        generationTemperature: true,
+        generationTopP: true,
+        generationTopK: true,
+        generationMaxTokens: true,
       },
     });
 
@@ -83,13 +83,13 @@ export async function POST(request: NextRequest) {
     // Decrypt the API key
     const apiKey = decryptApiKey(user.geminiApiKey);
 
-    // Prepare Gemini config
+    // Prepare Gemini config for generation
     const geminiConfig = {
-      model: user.geminiModel || undefined,
-      temperature: user.geminiTemperature ?? undefined,
-      topP: user.geminiTopP ?? undefined,
-      topK: user.geminiTopK ?? undefined,
-      maxOutputTokens: user.geminiMaxTokens ?? undefined,
+      model: user.generationModel || undefined,
+      temperature: user.generationTemperature ?? undefined,
+      topP: user.generationTopP ?? undefined,
+      topK: user.generationTopK ?? undefined,
+      maxOutputTokens: user.generationMaxTokens ?? undefined,
     };
 
     // Generate Urdu paragraph

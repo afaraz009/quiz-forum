@@ -5,11 +5,16 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const configSchema = z.object({
-  geminiModel: z.string().optional(),
-  geminiTemperature: z.number().min(0).max(2).optional(),
-  geminiTopP: z.number().min(0).max(1).optional(),
-  geminiTopK: z.number().int().min(1).max(100).optional(),
-  geminiMaxTokens: z.number().int().min(512).max(8192).optional(),
+  feedbackModel: z.string().optional(),
+  feedbackTemperature: z.number().min(0).max(2).optional(),
+  feedbackTopP: z.number().min(0).max(1).optional(),
+  feedbackTopK: z.number().int().min(1).max(100).optional(),
+  feedbackMaxTokens: z.number().int().min(512).max(8192).optional(),
+  generationModel: z.string().optional(),
+  generationTemperature: z.number().min(0).max(2).optional(),
+  generationTopP: z.number().min(0).max(1).optional(),
+  generationTopK: z.number().int().min(1).max(100).optional(),
+  generationMaxTokens: z.number().int().min(512).max(8192).optional(),
 });
 
 /**
@@ -38,15 +43,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { geminiModel, geminiTemperature, geminiTopP, geminiTopK, geminiMaxTokens } = validation.data;
+    const {
+      feedbackModel,
+      feedbackTemperature,
+      feedbackTopP,
+      feedbackTopK,
+      feedbackMaxTokens,
+      generationModel,
+      generationTemperature,
+      generationTopP,
+      generationTopK,
+      generationMaxTokens,
+    } = validation.data;
 
     // Prepare update data
     const updateData: any = {};
-    if (geminiModel !== undefined) updateData.geminiModel = geminiModel;
-    if (geminiTemperature !== undefined) updateData.geminiTemperature = geminiTemperature;
-    if (geminiTopP !== undefined) updateData.geminiTopP = geminiTopP;
-    if (geminiTopK !== undefined) updateData.geminiTopK = geminiTopK;
-    if (geminiMaxTokens !== undefined) updateData.geminiMaxTokens = geminiMaxTokens;
+
+    // Feedback settings
+    if (feedbackModel !== undefined) updateData.feedbackModel = feedbackModel;
+    if (feedbackTemperature !== undefined) updateData.feedbackTemperature = feedbackTemperature;
+    if (feedbackTopP !== undefined) updateData.feedbackTopP = feedbackTopP;
+    if (feedbackTopK !== undefined) updateData.feedbackTopK = feedbackTopK;
+    if (feedbackMaxTokens !== undefined) updateData.feedbackMaxTokens = feedbackMaxTokens;
+
+    // Generation settings
+    if (generationModel !== undefined) updateData.generationModel = generationModel;
+    if (generationTemperature !== undefined) updateData.generationTemperature = generationTemperature;
+    if (generationTopP !== undefined) updateData.generationTopP = generationTopP;
+    if (generationTopK !== undefined) updateData.generationTopK = generationTopK;
+    if (generationMaxTokens !== undefined) updateData.generationMaxTokens = generationMaxTokens;
 
     await prisma.user.update({
       where: { id: session.user.id },
