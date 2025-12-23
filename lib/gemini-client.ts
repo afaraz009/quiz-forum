@@ -76,7 +76,7 @@ export async function generateUrduParagraph(
         temperature: config?.temperature ?? 0.9,
         topP: config?.topP ?? 0.95,
         topK: config?.topK ?? 40,
-        maxOutputTokens: config?.maxOutputTokens ?? 2048,
+        maxOutputTokens: config?.maxOutputTokens ?? 8192,
       }
     });
 
@@ -134,7 +134,7 @@ export async function getFeedback(
         temperature: config?.temperature ?? 0.7,
         topP: config?.topP ?? 0.95,
         topK: config?.topK ?? 40,
-        maxOutputTokens: config?.maxOutputTokens ?? 2048,
+        maxOutputTokens: config?.maxOutputTokens ?? 8192,
       }
     });
 
