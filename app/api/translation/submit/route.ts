@@ -118,6 +118,11 @@ export async function POST(request: NextRequest) {
     // Get AI feedback
     const feedbackResponse = await getFeedback(apiKey, urduParagraph, userTranslation, geminiConfig);
 
+    // Log the entire AI feedback response for debugging
+    console.log('=== FULL AI FEEDBACK RESPONSE ===');
+    console.log(feedbackResponse);
+    console.log('=== END AI FEEDBACK RESPONSE ===');
+
     // Parse the feedback
     const parsedFeedback = parseFeedbackResponse(feedbackResponse);
 

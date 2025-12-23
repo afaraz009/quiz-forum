@@ -213,7 +213,7 @@ export default function SettingsPage() {
     setFeedbackTemperature(0.7);
     setFeedbackTopP(0.95);
     setFeedbackTopK(40);
-    setFeedbackMaxTokens(4096);
+    setFeedbackMaxTokens(8192);
   };
 
   const resetGenerationDefaults = () => {

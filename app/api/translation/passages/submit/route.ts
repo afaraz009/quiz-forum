@@ -93,6 +93,11 @@ export async function POST(req: Request) {
       geminiConfig
     );
 
+    // Log the entire AI feedback response for debugging
+    console.log('=== FULL AI FEEDBACK RESPONSE ===');
+    console.log(feedbackText);
+    console.log('=== END AI FEEDBACK RESPONSE ===');
+
     // Parse feedback
     const { feedbackRows, naturalVersion, score } = parseFeedbackResponse(feedbackText);
 
