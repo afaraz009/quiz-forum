@@ -33,18 +33,18 @@ export default function SettingsPage() {
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   // Feedback settings (translation evaluation)
-  const [feedbackModel, setFeedbackModel] = useState('gemini-2.0-flash-exp');
+  const [feedbackModel, setFeedbackModel] = useState('gemini-3-flash-preview');
   const [feedbackTemperature, setFeedbackTemperature] = useState(0.7);
   const [feedbackTopP, setFeedbackTopP] = useState(0.95);
   const [feedbackTopK, setFeedbackTopK] = useState(40);
-  const [feedbackMaxTokens, setFeedbackMaxTokens] = useState(2048);
+  const [feedbackMaxTokens, setFeedbackMaxTokens] = useState(8192);
 
   // Generation settings (paragraph creation)
-  const [generationModel, setGenerationModel] = useState('gemini-2.0-flash-exp');
+  const [generationModel, setGenerationModel] = useState('gemini-2.5-flash-lite');
   const [generationTemperature, setGenerationTemperature] = useState(0.9);
   const [generationTopP, setGenerationTopP] = useState(0.95);
   const [generationTopK, setGenerationTopK] = useState(40);
-  const [generationMaxTokens, setGenerationMaxTokens] = useState(2048);
+  const [generationMaxTokens, setGenerationMaxTokens] = useState(8192);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -67,14 +67,14 @@ export default function SettingsPage() {
         setFeedbackTemperature(data.settings.feedbackTemperature ?? 0.7);
         setFeedbackTopP(data.settings.feedbackTopP ?? 0.95);
         setFeedbackTopK(data.settings.feedbackTopK ?? 40);
-        setFeedbackMaxTokens(data.settings.feedbackMaxTokens ?? 2048);
+        setFeedbackMaxTokens(data.settings.feedbackMaxTokens ?? 8192);
 
         // Generation settings
         setGenerationModel(data.settings.generationModel || 'gemini-2.0-flash-exp');
         setGenerationTemperature(data.settings.generationTemperature ?? 0.9);
         setGenerationTopP(data.settings.generationTopP ?? 0.95);
         setGenerationTopK(data.settings.generationTopK ?? 40);
-        setGenerationMaxTokens(data.settings.generationMaxTokens ?? 2048);
+        setGenerationMaxTokens(data.settings.generationMaxTokens ?? 8192);
       }
 
       // Fetch available models if API key is configured
@@ -209,19 +209,19 @@ export default function SettingsPage() {
   };
 
   const resetFeedbackDefaults = () => {
-    setFeedbackModel('gemini-2.0-flash-exp');
+    setFeedbackModel('gemini-3-flash-preview');
     setFeedbackTemperature(0.7);
     setFeedbackTopP(0.95);
     setFeedbackTopK(40);
-    setFeedbackMaxTokens(2048);
+    setFeedbackMaxTokens(4096);
   };
 
   const resetGenerationDefaults = () => {
-    setGenerationModel('gemini-2.0-flash-exp');
+    setGenerationModel('gemini-2.5-flash');
     setGenerationTemperature(0.9);
     setGenerationTopP(0.95);
     setGenerationTopK(40);
-    setGenerationMaxTokens(2048);
+    setGenerationMaxTokens(8192);
   };
 
   if (status === 'loading') {
@@ -366,7 +366,7 @@ export default function SettingsPage() {
           max={8192}
           step={256}
           value={maxTokens}
-          onChange={(e) => setMaxTokens(parseInt(e.target.value) || 2048)}
+          onChange={(e) => setMaxTokens(parseInt(e.target.value) || 8192)}
         />
         <p className="text-xs text-muted-foreground flex items-start gap-1">
           <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />

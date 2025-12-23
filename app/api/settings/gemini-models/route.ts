@@ -80,40 +80,19 @@ export async function GET(request: NextRequest) {
     // Return a fallback list of known models if the API call fails
     const fallbackModels = [
       {
-        name: 'gemini-2.0-flash-exp',
-        displayName: 'Gemini 2.0 Flash (Experimental)',
+        name: 'gemini-2.5-flash',
+        displayName: 'Gemini 2.5 Flash (Experimental)',
         description: 'Latest experimental flash model',
         inputTokenLimit: 1000000,
         outputTokenLimit: 8192,
       },
       {
-        name: 'gemini-1.5-flash',
-        displayName: 'Gemini 1.5 Flash',
+        name: 'gemini-3-flash-preview',
+        displayName: 'Gemini 3 flash',
         description: 'Fast and versatile multimodal model',
         inputTokenLimit: 1000000,
         outputTokenLimit: 8192,
-      },
-      {
-        name: 'gemini-1.5-flash-8b',
-        displayName: 'Gemini 1.5 Flash-8B',
-        description: 'Smaller, faster flash model',
-        inputTokenLimit: 1000000,
-        outputTokenLimit: 8192,
-      },
-      {
-        name: 'gemini-1.5-pro',
-        displayName: 'Gemini 1.5 Pro',
-        description: 'Most capable model for complex tasks',
-        inputTokenLimit: 2000000,
-        outputTokenLimit: 8192,
-      },
-      {
-        name: 'gemini-pro',
-        displayName: 'Gemini Pro',
-        description: 'Previous generation model',
-        inputTokenLimit: 30720,
-        outputTokenLimit: 2048,
-      },
+      }
     ];
 
     return NextResponse.json({

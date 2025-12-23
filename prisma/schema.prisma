@@ -53,14 +53,14 @@ model User {
   feedbackTemperature  Float?               @default(0.7)
   feedbackTopP         Float?               @default(0.95)
   feedbackTopK         Int?                 @default(40)
-  feedbackMaxTokens    Int?                 @default(2048)
+  feedbackMaxTokens    Int?                 @default(8192)
 
   // Paragraph generation settings (for creating Urdu text)
   generationModel      String?              @default("gemini-2.0-flash-exp")
   generationTemperature Float?              @default(0.9)
   generationTopP       Float?               @default(0.95)
   generationTopK       Int?                 @default(40)
-  generationMaxTokens  Int?                 @default(2048)
+  generationMaxTokens  Int?                 @default(8192)
 
   accounts             Account[]
   sessions             Session[]
