@@ -49,14 +49,14 @@ model User {
   geminiApiKey         String?              // Encrypted Gemini API key
 
   // Feedback generation settings (for translation evaluation)
-  feedbackModel        String?              @default("gemini-2.0-flash-exp")
+  feedbackModel        String?              @default("gemini-2.5-flash")
   feedbackTemperature  Float?               @default(0.7)
   feedbackTopP         Float?               @default(0.95)
   feedbackTopK         Int?                 @default(40)
   feedbackMaxTokens    Int?                 @default(8192)
 
   // Paragraph generation settings (for creating Urdu text)
-  generationModel      String?              @default("gemini-2.0-flash-exp")
+  generationModel      String?              @default("gemini-2.5-flash")
   generationTemperature Float?              @default(0.9)
   generationTopP       Float?               @default(0.95)
   generationTopK       Int?                 @default(40)

@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const TIMEOUT_MS = 30000; // 30 seconds
 const MAX_RETRIES = 2;
@@ -8,15 +8,15 @@ const INITIAL_RETRY_DELAY_MS = 1000; // 1 second
  * Difficulty level prompts for paragraph generation
  */
 const DIFFICULTY_PROMPTS = {
-  1: 'beginner level (simple vocabulary, short sentences, common topics)',
-  2: 'intermediate level (moderate vocabulary, medium-length sentences, varied topics)',
-  3: 'advanced level (complex vocabulary, longer sentences, abstract topics)',
+  1: "beginner level (simple vocabulary, short sentences, common topics)",
+  2: "intermediate level (moderate vocabulary, medium-length sentences, varied topics)",
+  3: "advanced level (complex vocabulary, longer sentences, abstract topics)",
 };
 
 /**
  * Sleep utility for retry delays
  */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Execute a Gemini API call with timeout and retries
@@ -31,14 +31,14 @@ async function executeWithRetries<T>(
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), TIMEOUT_MS);
+        setTimeout(() => reject(new Error("Request timeout")), TIMEOUT_MS);
       });
 
       // Race between the API call and timeout
       const result = await Promise.race([fn(), timeoutPromise]);
       return result;
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
+      lastError = error instanceof Error ? error : new Error("Unknown error");
 
       // Don't retry on the last attempt
       if (attempt < retries) {
@@ -49,7 +49,7 @@ async function executeWithRetries<T>(
     }
   }
 
-  throw lastError || new Error('Request failed after retries');
+  throw lastError || new Error("Request failed after retries");
 }
 
 export interface GeminiConfig {
@@ -71,13 +71,13 @@ export async function generateUrduParagraph(
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: config?.model || 'gemini-2.0-flash-exp',
+      model: config?.model || "gemini-2.5-flash",
       generationConfig: {
         temperature: config?.temperature ?? 0.9,
         topP: config?.topP ?? 0.95,
         topK: config?.topK ?? 40,
         maxOutputTokens: config?.maxOutputTokens ?? 8192,
-      }
+      },
     });
 
     const difficultyText = DIFFICULTY_PROMPTS[difficultyLevel];
@@ -95,25 +95,28 @@ IMPORTANT: Return ONLY the Urdu text, no English translation, no explanations, n
     const text = result.response.text().trim();
 
     if (!text) {
-      throw new Error('Empty response from Gemini API');
+      throw new Error("Empty response from Gemini API");
     }
 
     return text;
   } catch (error) {
+    console.error("Gemini API error details:", error);
     if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
       // Handle specific Gemini errors
-      if (error.message.includes('API key')) {
-        throw new Error('Invalid Gemini API key');
+      if (error.message.includes("API key")) {
+        throw new Error("Invalid Gemini API key");
       }
-      if (error.message.includes('quota')) {
-        throw new Error('Gemini API quota exceeded. Please try again later.');
+      if (error.message.includes("quota")) {
+        throw new Error("Gemini API quota exceeded. Please try again later.");
       }
-      if (error.message.includes('timeout')) {
-        throw new Error('Request timed out. Please try again.');
+      if (error.message.includes("timeout")) {
+        throw new Error("Request timed out. Please try again.");
       }
       throw error;
     }
-    throw new Error('Failed to generate Urdu paragraph');
+    throw new Error("Failed to generate Urdu paragraph");
   }
 }
 
@@ -129,13 +132,13 @@ export async function getFeedback(
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: config?.model || 'gemini-2.0-flash-exp',
+      model: config?.model || "gemini-2.5-flash",
       generationConfig: {
         temperature: config?.temperature ?? 0.7,
         topP: config?.topP ?? 0.95,
         topK: config?.topK ?? 40,
         maxOutputTokens: config?.maxOutputTokens ?? 8192,
-      }
+      },
     });
 
     const prompt = `You are an English-Urdu translation expert. Analyze the following translation:
@@ -175,25 +178,25 @@ IMPORTANT INSTRUCTIONS:
     const text = result.response.text().trim();
 
     if (!text) {
-      throw new Error('Empty response from Gemini API');
+      throw new Error("Empty response from Gemini API");
     }
 
     return text;
   } catch (error) {
     if (error instanceof Error) {
       // Handle specific Gemini errors
-      if (error.message.includes('API key')) {
-        throw new Error('Invalid Gemini API key');
+      if (error.message.includes("API key")) {
+        throw new Error("Invalid Gemini API key");
       }
-      if (error.message.includes('quota')) {
-        throw new Error('Gemini API quota exceeded. Please try again later.');
+      if (error.message.includes("quota")) {
+        throw new Error("Gemini API quota exceeded. Please try again later.");
       }
-      if (error.message.includes('timeout')) {
-        throw new Error('Request timed out. Please try again.');
+      if (error.message.includes("timeout")) {
+        throw new Error("Request timed out. Please try again.");
       }
       throw error;
     }
-    throw new Error('Failed to get translation feedback');
+    throw new Error("Failed to get translation feedback");
   }
 }
 
@@ -203,7 +206,7 @@ IMPORTANT INSTRUCTIONS:
 export async function testApiKey(apiKey: string): Promise<boolean> {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     await executeWithRetries(async () => {
       const response = await model.generateContent('Say "OK"');
